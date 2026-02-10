@@ -26,7 +26,12 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +46,15 @@ import trending.composeapp.generated.resources.Res
 import trending.composeapp.generated.resources.icon_flame
 import trending.composeapp.generated.resources.icon_sparkles
 
+fun String.toColor(): Color {
+    val hex = this.removePrefix("#")
+    return if (hex.length == 6) {
+        Color((hex.toLong(16) or 0xFF000000L).toInt())
+    } else {
+        Color.Gray
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
@@ -48,6 +62,22 @@ fun App() {
     val tabs = listOf("今日", "每周", "每月")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
+    val api = remember { TrendingApi() }
+    
+    // Store data for each tab
+    var dailyRepos by remember { mutableStateOf<List<TrendingRepo>>(emptyList()) }
+    var weeklyRepos by remember { mutableStateOf<List<TrendingRepo>>(emptyList()) }
+    var monthlyRepos by remember { mutableStateOf<List<TrendingRepo>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        println("App: Starting to fetch trending data...")
+        dailyRepos = api.fetchTrending("今日")
+        println("App: Daily repos updated: ${dailyRepos.size}")
+        weeklyRepos = api.fetchTrending("每周")
+        println("App: Weekly repos updated: ${weeklyRepos.size}")
+        monthlyRepos = api.fetchTrending("每月")
+        println("App: Monthly repos updated: ${monthlyRepos.size}")
+    }
 
     MaterialTheme {
         Scaffold(
@@ -88,14 +118,21 @@ fun App() {
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
-                ) { _ ->
+                ) { pageIndex ->
+                    val repos = when(pageIndex) {
+                        0 -> dailyRepos
+                        1 -> weeklyRepos
+                        else -> monthlyRepos
+                    }
+                    
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(
-                            count = 20,
-                            key = { index -> index }
+                            count = repos.size,
+                            key = { index -> repos[index].url }
                         ) { index ->
+                            val repo = repos[index]
                             Row(
                                 modifier = Modifier.padding(16.dp),
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -115,42 +152,44 @@ fun App() {
                                 }
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text(
-                                        text = "anthropic/claude-3-opus",
+                                        text = "${repo.author}/${repo.repoName}",
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.W500,
                                         color = Color(0xFF1C1B1F)
                                     )
                                     Text(
-                                        text = "Anthropic\\'s most powerful AI model. Excels at highly complex tasks with strong reasoning capabilities.",
+                                        text = repo.description,
                                         fontSize = 14.sp,
                                         lineHeight = 20.sp,
                                         color = Color(0xFF49454F)
                                     )
 
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(
-                                                color = Color(0xFFE8DEF8),
-                                                shape = RoundedCornerShape(12.dp)
-                                            )
-                                            .padding(12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.Top
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.icon_sparkles),
-                                            contentDescription = "Flame",
+                                    if (!repo.aiSummary.isNullOrEmpty()) {
+                                        Row(
                                             modifier = Modifier
-                                                .size(16.dp)
-                                                .padding(top = 2.dp)
-                                        )
-                                        Text(
-                                            text = "这是 Anthropic 推出的旗舰级 AI 模型，在复杂推理、代码生成和创意写作方面表现出色。特别适合需要深度思考的应用场景。",
-                                            fontSize = 14.sp,
-                                            lineHeight = 20.sp,
-                                            color = Color(0xFF21005D)
-                                        )
+                                                .fillMaxWidth()
+                                                .background(
+                                                    color = Color(0xFFE8DEF8),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                )
+                                                .padding(12.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.Top
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.icon_sparkles),
+                                                contentDescription = "Flame",
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .padding(top = 2.dp)
+                                            )
+                                            Text(
+                                                text = repo.aiSummary,
+                                                fontSize = 14.sp,
+                                                lineHeight = 20.sp,
+                                                color = Color(0xFF21005D)
+                                            )
+                                        }
                                     }
 
                                     Row(
@@ -160,15 +199,15 @@ fun App() {
                                         Surface(
                                             modifier = Modifier.size(12.dp),
                                             shape = CircleShape,
-                                            color = Color(0xFF3572A5)
+                                            color = repo.languageColor?.toColor() ?: Color.Gray
                                         ) {}
-                                        Text(text = "Python", fontSize = 14.sp, color = Color(0xFF49454F))
+                                        Text(text = repo.language ?: "", fontSize = 14.sp, color = Color(0xFF49454F))
                                         Icon(
                                             painter = painterResource(Res.drawable.icon_flame),
                                             contentDescription = "Flame",
                                             modifier = Modifier.size(16.dp)
                                         )
-                                        Text(text = "2847 stars today", fontSize = 14.sp, color = Color(0xFF49454F))
+                                        Text(text = "${repo.currentPeriodStars} stars ${repo.since}", fontSize = 14.sp, color = Color(0xFF49454F))
                                     }
                                 }
                             }
