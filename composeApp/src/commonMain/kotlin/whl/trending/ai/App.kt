@@ -70,13 +70,9 @@ fun App() {
     var monthlyRepos by remember { mutableStateOf<List<TrendingRepo>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        println("App: Starting to fetch trending data...")
         dailyRepos = api.fetchTrending("今日")
-        println("App: Daily repos updated: ${dailyRepos.size}")
         weeklyRepos = api.fetchTrending("每周")
-        println("App: Weekly repos updated: ${weeklyRepos.size}")
         monthlyRepos = api.fetchTrending("每月")
-        println("App: Monthly repos updated: ${monthlyRepos.size}")
     }
 
     MaterialTheme {

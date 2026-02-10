@@ -34,16 +34,10 @@ class TrendingApi {
             else -> "daily"
         }
         val url = "$baseUrl/$endpoint/all.json"
-        println("TrendingApi: Fetching from $url")
         return try {
             val response = client.get(url)
-            println("TrendingApi: Response status: ${response.status}")
-            val body = response.body<List<TrendingRepo>>()
-            println("TrendingApi: Successfully fetched ${body.size} repos for $type")
-            body
+            response.body<List<TrendingRepo>>()
         } catch (e: Exception) {
-            println("TrendingApi: Error fetching $type: ${e.message}")
-            e.printStackTrace()
             emptyList()
         }
     }
