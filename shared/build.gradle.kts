@@ -17,6 +17,12 @@ kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_17
         }
+        androidResources {
+            enable = true
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
     
     listOf(
