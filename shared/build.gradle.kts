@@ -14,8 +14,6 @@ kotlin {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
-        withJava()
-
         compilerOptions {
             jvmTarget = JvmTarget.JVM_17
         }
