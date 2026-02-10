@@ -1,7 +1,9 @@
 package whl.trending.ai
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,18 +12,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,22 +82,31 @@ fun App() {
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
-                ) { page ->
-                    val pageItems = List(20) { index -> "${tabs[page]}项目 ${index + 1}" }
-
+                ) { _ ->
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 16.dp),
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         items(
-                            items = pageItems,
-                            key = { item -> item }
-                        ) { item ->
-                            ListItem(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                headlineContent = { Text(item) },
-                                supportingContent = { Text("这是 $item 的描述") }
-                            )
+                            count = 20,
+                            key = { index -> index }
+                        ) { index ->
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                            ) {
+                                Surface(
+                                    modifier = Modifier.size(28.dp),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = "${index + 1}")
+                                    }
+                                }
+                            }
                             HorizontalDivider(modifier = Modifier.fillMaxWidth())
                         }
                     }
