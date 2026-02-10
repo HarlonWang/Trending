@@ -38,6 +38,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import trending.composeapp.generated.resources.GitHub_Invertocat_Black
 import trending.composeapp.generated.resources.Res
+import trending.composeapp.generated.resources.icon_flame
+import trending.composeapp.generated.resources.icon_sparkles
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,8 +134,17 @@ fun App() {
                                                 color = Color(0xFFE8DEF8),
                                                 shape = RoundedCornerShape(12.dp)
                                             )
-                                            .padding(12.dp)
+                                            .padding(12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.Top
                                     ) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.icon_sparkles),
+                                            contentDescription = "Flame",
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .padding(top = 2.dp)
+                                        )
                                         Text(
                                             text = "这是 Anthropic 推出的旗舰级 AI 模型，在复杂推理、代码生成和创意写作方面表现出色。特别适合需要深度思考的应用场景。",
                                             fontSize = 14.sp,
@@ -152,6 +163,11 @@ fun App() {
                                             color = Color(0xFF3572A5)
                                         ) {}
                                         Text(text = "Python", fontSize = 14.sp, color = Color(0xFF49454F))
+                                        Icon(
+                                            painter = painterResource(Res.drawable.icon_flame),
+                                            contentDescription = "Flame",
+                                            modifier = Modifier.size(16.dp)
+                                        )
                                         Text(text = "2847 stars today", fontSize = 14.sp, color = Color(0xFF49454F))
                                     }
                                 }
