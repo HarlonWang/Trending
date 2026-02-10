@@ -122,6 +122,18 @@ fun App() {
                                         lineHeight = 20.sp,
                                         color = Color(0xFF49454F)
                                     )
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Surface(
+                                            modifier = Modifier.size(12.dp),
+                                            shape = CircleShape,
+                                            color = Color(0xFF3572A5)
+                                        ) {}
+                                        Text(text = "Python", fontSize = 14.sp, color = Color(0xFF49454F))
+                                        Text(text = "2847 stars today", fontSize = 14.sp, color = Color(0xFF49454F))
+                                    }
                                 }
                             }
                             HorizontalDivider(modifier = Modifier.fillMaxWidth())
