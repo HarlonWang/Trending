@@ -1,5 +1,6 @@
 package whl.trending.ai
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,10 +25,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import trending.composeapp.generated.resources.GitHub_Invertocat_Black
@@ -90,6 +94,7 @@ fun App() {
                         ) { index ->
                             Row(
                                 modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 Surface(
                                     modifier = Modifier.size(28.dp),
@@ -101,8 +106,22 @@ fun App() {
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(text = "${index + 1}")
+                                        Text(text = "${index + 1}", fontSize = 12.sp, fontWeight = FontWeight.W500)
                                     }
+                                }
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text(
+                                        text = "anthropic/claude-3-opus",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.W500,
+                                        color = Color(0xFF1C1B1F)
+                                    )
+                                    Text(
+                                        text = "Anthropic\\'s most powerful AI model. Excels at highly complex tasks with strong reasoning capabilities.",
+                                        fontSize = 14.sp,
+                                        lineHeight = 20.sp,
+                                        color = Color(0xFF49454F)
+                                    )
                                 }
                             }
                             HorizontalDivider(modifier = Modifier.fillMaxWidth())
