@@ -1,8 +1,11 @@
 package whl.trending.ai
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -16,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import trending.composeapp.generated.resources.GitHub_Invertocat_Black
 
@@ -26,7 +30,8 @@ import trending.composeapp.generated.resources.Res
 @Preview
 fun App() {
     val tabs = listOf("今日", "每周", "每月")
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val coroutineScope = rememberCoroutineScope()
 
     MaterialTheme {
         Scaffold(
@@ -45,17 +50,36 @@ fun App() {
                 )
             },
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
-                PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
                     tabs.forEachIndexed { index, tabTitle ->
                         Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
                             text = { Text(tabTitle) }
                         )
                     }
                 }
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    Text(
+                        text = "${tabs[page]}内容",
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
+
         }
     }
 }
