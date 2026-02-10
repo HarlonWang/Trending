@@ -43,10 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
-import trending.composeapp.generated.resources.GitHub_Invertocat_Black
-import trending.composeapp.generated.resources.Res
-import trending.composeapp.generated.resources.icon_flame
-import trending.composeapp.generated.resources.icon_sparkles
+import trending.shared.generated.resources.GitHub_Invertocat_Black
+import trending.shared.generated.resources.Res
+import trending.shared.generated.resources.icon_flame
+import trending.shared.generated.resources.icon_sparkles
 
 fun String.toColor(): Color {
     val hex = this.removePrefix("#")
