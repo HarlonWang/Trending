@@ -35,6 +35,8 @@ android {
         
         val ciVersionName = System.getenv("VERSION_NAME")
         versionName = ciVersionName ?: "0.1.0-dev"
+
+        manifestPlaceholders["appName"] = "Trending"
     }
 
     // 签名配置：从环境变量读取加密存储的密钥信息
@@ -60,6 +62,12 @@ android {
             isMinifyEnabled = false
             // 应用签名配置
             signingConfig = signingConfigs.getByName("release")
+            manifestPlaceholders["appName"] = "Trending"
+        }
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+            manifestPlaceholders["appName"] = "Trending (D)"
         }
     }
     compileOptions {
