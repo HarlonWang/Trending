@@ -28,9 +28,28 @@ android {
         applicationId = "whl.trending.ai"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.1.0"
+        
+        // 动态版本号逻辑：优先从环境变量读取
+        val ciBuildNumber = System.getenv("BUILD_NUMBER")?.toIntOrNull()
+        versionCode = ciBuildNumber ?: 1
+        
+        val ciVersionName = System.getenv("VERSION_NAME")
+        versionName = ciVersionName ?: "0.1.0-dev"
     }
+
+    // 签名配置：从环境变量读取加密存储的密钥信息
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+            if (!keystorePath.isNullOrEmpty()) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -39,6 +58,8 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            // 应用签名配置
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
