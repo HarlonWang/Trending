@@ -24,7 +24,9 @@ class TrendingApi {
     }
 
     // Using jsDelivr mirror for better accessibility
-    private val baseUrl = "https://cdn.jsdelivr.net/gh/HarlonWang/github-ai-trending-api@main/api/trending"
+    private val baseUrl = "https://cdn.jsdmirror.com/gh/HarlonWang/github-ai-trending-api@main/api/trending"
+    // private val baseUrl = "https://cdn.jsdelivr.net/gh/HarlonWang/github-ai-trending-api@main/api/trending"
+    // private val baseUrl = "https://raw.githubusercontent.com/HarlonWang/github-ai-trending-api/main/api/trending"
 
     suspend fun fetchTrending(type: String): List<TrendingRepo> {
         val endpoint = when(type) {
