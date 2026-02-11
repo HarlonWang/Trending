@@ -46,8 +46,9 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import trending.shared.generated.resources.GitHub_Invertocat_Black
 import trending.shared.generated.resources.Res
+import trending.shared.generated.resources.deepseek_color
+import trending.shared.generated.resources.gemini_color
 import trending.shared.generated.resources.icon_flame
-import trending.shared.generated.resources.icon_sparkles
 
 fun String.toColor(): Color {
     val hex = this.removePrefix("#")
@@ -228,9 +229,15 @@ fun App() {
                                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                     verticalAlignment = Alignment.Top
                                                 ) {
+                                                    val aiIcon = when (repo.aiSummary.source.lowercase()) {
+                                                        "gemini" -> Res.drawable.gemini_color
+                                                        "deepseek" -> Res.drawable.deepseek_color
+                                                        else -> Res.drawable.gemini_color
+                                                    }
                                                     Icon(
-                                                        painter = painterResource(Res.drawable.icon_sparkles),
-                                                        contentDescription = "Flame",
+                                                        painter = painterResource(aiIcon),
+                                                        contentDescription = "AI-ICON",
+                                                        tint = Color.Unspecified,
                                                         modifier = Modifier
                                                             .size(16.dp)
                                                             .padding(top = 2.dp)
