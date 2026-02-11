@@ -6,7 +6,10 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
 
 class TrendingApi {
     private val client = HttpClient {
@@ -23,10 +26,9 @@ class TrendingApi {
         }
     }
 
-    // Using jsDelivr mirror for better accessibility
-    private val baseUrl = "https://cdn.jsdmirror.com/gh/HarlonWang/github-ai-trending-api@main/api/trending"
-    // private val baseUrl = "https://cdn.jsdelivr.net/gh/HarlonWang/github-ai-trending-api@main/api/trending"
-    // private val baseUrl = "https://raw.githubusercontent.com/HarlonWang/github-ai-trending-api/main/api/trending"
+    private val baseHost = "https://cdn.jsdmirror.com/gh/HarlonWang/github-ai-trending-api@main"
+    private val apiPrefix = "api/trending"
+    private val archivePrefix = "archives"
 
     suspend fun fetchTrending(type: String): List<TrendingRepo> {
         val endpoint = when(type) {
@@ -35,12 +37,26 @@ class TrendingApi {
             "每月" -> "monthly"
             else -> "daily"
         }
-        val url = "$baseUrl/$endpoint/all.json"
+
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        // 1. Try Archive URL first (e.g., .../archives/2026-02-11/daily/all.json)
+        val archiveUrl = "$baseHost/$archivePrefix/$today/$endpoint/all.json"
+        try {
+            val response = client.get(archiveUrl)
+            if (response.status.value == 200) {
+                return response.body<TrendingResponse>().data
+            }
+        } catch (e: Exception) {
+            println("Archive fetch failed for $today, falling back to main api: ${e.message}")
+        }
+
+        // 2. Fallback to standard URL (e.g., .../api/trending/daily/all.json)
+        val standardUrl = "$baseHost/$apiPrefix/$endpoint/all.json"
         return try {
-            val response = client.get(url)
+            val response = client.get(standardUrl)
             response.body<TrendingResponse>().data
         } catch (e: Exception) {
-            println(e)
+            println("Standard fetch failed: ${e.message}")
             emptyList()
         }
     }
