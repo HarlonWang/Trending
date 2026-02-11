@@ -3,7 +3,7 @@
 > 🚧 **当前状态：项目正在积极开发中 (Work in Progress)**
 
 **「 洞察趋势，AI 领航 」**  
-*聚合 GitHub Trending 热门仓库，通过 AI 摘要技术，让核心价值触手及。*
+*聚合 GitHub Trending 热门仓库，通过 AI 摘要技术，让核心价值触手可及。*
 
 ---
 
