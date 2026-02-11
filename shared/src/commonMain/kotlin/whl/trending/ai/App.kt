@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,24 +70,24 @@ fun App() {
     val api = remember { TrendingApi() }
     
     // Store data for each tab
-    var dailyRepos by remember { mutableStateOf<List<TrendingRepo>>(emptyList()) }
-    var weeklyRepos by remember { mutableStateOf<List<TrendingRepo>>(emptyList()) }
-    var monthlyRepos by remember { mutableStateOf<List<TrendingRepo>>(emptyList()) }
+    var dailyData by remember { mutableStateOf(TrendingResponse()) }
+    var weeklyData by remember { mutableStateOf(TrendingResponse()) }
+    var monthlyData by remember { mutableStateOf(TrendingResponse()) }
     var dailyLoading by remember { mutableStateOf(true) }
     var weeklyLoading by remember { mutableStateOf(true) }
     var monthlyLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         dailyLoading = true
-        dailyRepos = api.fetchTrending("今日")
+        dailyData = api.fetchTrending("今日")
         dailyLoading = false
 
         weeklyLoading = true
-        weeklyRepos = api.fetchTrending("本周")
+        weeklyData = api.fetchTrending("本周")
         weeklyLoading = false
 
         monthlyLoading = true
-        monthlyRepos = api.fetchTrending("本月")
+        monthlyData = api.fetchTrending("本月")
         monthlyLoading = false
     }
 
@@ -130,11 +131,12 @@ fun App() {
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
-                    val repos = when(pageIndex) {
-                        0 -> dailyRepos
-                        1 -> weeklyRepos
-                        else -> monthlyRepos
+                    val data = when(pageIndex) {
+                        0 -> dailyData
+                        1 -> weeklyData
+                        else -> monthlyData
                     }
+                    val repos = data.data
                     val isLoading = when(pageIndex) {
                         0 -> dailyLoading
                         1 -> weeklyLoading
@@ -150,9 +152,9 @@ fun App() {
                                 isRefreshing = true
                                 val refreshed = api.fetchTrending(tabs[pageIndex])
                                 when(pageIndex) {
-                                    0 -> dailyRepos = refreshed
-                                    1 -> weeklyRepos = refreshed
-                                    else -> monthlyRepos = refreshed
+                                    0 -> dailyData = refreshed
+                                    1 -> weeklyData = refreshed
+                                    else -> monthlyData = refreshed
                                 }
                                 isRefreshing = false
                             }
@@ -272,6 +274,20 @@ fun App() {
                                         }
                                     }
                                     HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                                }
+
+                                if (data.updateAt.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            text = "最后更新于: ${data.updateAt}",
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 24.dp),
+                                            textAlign = TextAlign.Center,
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.outline
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -32,7 +32,7 @@ class TrendingApi {
     private val apiPrefix = "api/trending"
     private val archivePrefix = "archives"
 
-    suspend fun fetchTrending(type: String): List<TrendingRepo> {
+    suspend fun fetchTrending(type: String): TrendingResponse {
         val endpoint = when(type) {
             "今日" -> "daily"
             "本周" -> "weekly"
@@ -46,7 +46,7 @@ class TrendingApi {
         try {
             val response = client.get(archiveUrl)
             if (response.status.value == 200) {
-                return response.body<TrendingResponse>().data
+                return response.body<TrendingResponse>()
             }
         } catch (e: Exception) {
             println("Archive fetch failed for $today, falling back to main api: ${e.message}")
@@ -56,10 +56,10 @@ class TrendingApi {
         val standardUrl = "$baseHost/$apiPrefix/$endpoint/all.json"
         return try {
             val response = client.get(standardUrl)
-            response.body<TrendingResponse>().data
+            response.body<TrendingResponse>()
         } catch (e: Exception) {
             println("Standard fetch failed: ${e.message}")
-            emptyList()
+            TrendingResponse()
         }
     }
 }
