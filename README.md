@@ -11,7 +11,7 @@
 
 **Trending AI** 是一款基于 **Kotlin Multiplatform (KMP)** 开发的跨平台移动应用，致力于为开发者提供极致的 GitHub Trending 仓库探索体验。
 
-我们深知在信息爆炸的开源世界中，快速定位高价值项目的重要性。因此，该应用不仅展示 GitHub 每日、每周及每月的 Trending 热门仓库榜单，更深度集成了 **Gemini** 与 **DeepSeek** 等模型，为每个仓库生成精炼的 **AI 摘要速览**。无需深入阅读代码库，即可快速洞察项目核心逻辑。
+我们深知在信息爆炸的开源世界中，快速定位高价值项目的重要性。因此，该应用不仅展示 GitHub 今日、本周及本月的 Trending 热门仓库榜单，更深度集成了 **Gemini** 与 **DeepSeek** 等模型，为每个仓库生成精炼的 **AI 摘要速览**。无需深入阅读代码库，即可快速洞察项目核心逻辑。
 
 ---
 
@@ -25,7 +25,7 @@
 
 ## ✨ 核心功能
 
-- 🚀 **GitHub 热门榜单**：支持查看“今日”、“每周”和“每月”的 Trending 热门项目。
+- 🚀 **GitHub 热门榜单**：支持查看“今日”、“本周”和“本月”的 Trending 热门项目。
 - 🤖 **AI 智能摘要**：集成 Gemini 和 DeepSeek 模型，自动生成项目的核心解读。
 - 📱 **原生跨平台体验**：采用 Compose Multiplatform 构建，一套代码同时运行在 Android 和 iOS 平台。
 - 🎨 **Material 3 设计**：遵循 Google 最新 Material Design 3 规范，提供流畅的视觉交互。

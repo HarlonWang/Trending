@@ -35,8 +35,8 @@ class TrendingApi {
     suspend fun fetchTrending(type: String): List<TrendingRepo> {
         val endpoint = when(type) {
             "今日" -> "daily"
-            "每周" -> "weekly"
-            "每月" -> "monthly"
+            "本周" -> "weekly"
+            "本月" -> "monthly"
             else -> "daily"
         }
 

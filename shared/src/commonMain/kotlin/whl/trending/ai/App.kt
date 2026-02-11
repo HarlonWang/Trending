@@ -63,7 +63,7 @@ fun String.toColor(): Color {
 @Composable
 @Preview
 fun App() {
-    val tabs = listOf("今日", "每周", "每月")
+    val tabs = listOf("今日", "本周", "本月")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
     val api = remember { TrendingApi() }
@@ -82,11 +82,11 @@ fun App() {
         dailyLoading = false
 
         weeklyLoading = true
-        weeklyRepos = api.fetchTrending("每周")
+        weeklyRepos = api.fetchTrending("本周")
         weeklyLoading = false
 
         monthlyLoading = true
-        monthlyRepos = api.fetchTrending("每月")
+        monthlyRepos = api.fetchTrending("本月")
         monthlyLoading = false
     }
 
