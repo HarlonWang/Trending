@@ -229,6 +229,7 @@ fun App() {
                                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                     verticalAlignment = Alignment.Top
                                                 ) {
+                                                    // 对应图标可以从这里获取：https://lobehub.com/zh/icons
                                                     val aiIcon = when (repo.aiSummary.source.lowercase()) {
                                                         "gemini" -> Res.drawable.gemini_color
                                                         "deepseek" -> Res.drawable.deepseek_color
