@@ -24,8 +24,8 @@
 
 ## ✨ 核心功能
 
-- 🚀 **GitHub 热门榜单**：支持查看“今日”、“每周”和“每月”的 AI 相关热门项目。
-- 🤖 **AI 智能摘要**：集成 Gemini 和 DeepSeek 模型，自动生成项目的中文核心解读。
+- 🚀 **GitHub 热门榜单**：支持查看“今日”、“每周”和“每月”的 Trending 热门项目。
+- 🤖 **AI 智能摘要**：集成 Gemini 和 DeepSeek 模型，自动生成项目的核心解读。
 - 📱 **原生跨平台体验**：采用 Compose Multiplatform 构建，一套代码同时运行在 Android 和 iOS 平台。
 - 🎨 **Material 3 设计**：遵循 Google 最新 Material Design 3 规范，提供流畅的视觉交互。
 
