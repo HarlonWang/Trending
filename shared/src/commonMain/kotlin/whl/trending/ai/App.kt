@@ -216,7 +216,7 @@ fun App() {
                                                 color = Color(0xFF49454F)
                                             )
 
-                                            if (!repo.aiSummary.isNullOrEmpty()) {
+                                            if (!repo.aiSummary?.content.isNullOrEmpty()) {
                                                 Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -236,7 +236,7 @@ fun App() {
                                                             .padding(top = 2.dp)
                                                     )
                                                     Text(
-                                                        text = repo.aiSummary,
+                                                        text = repo.aiSummary.content,
                                                         fontSize = 14.sp,
                                                         lineHeight = 20.sp,
                                                         color = Color(0xFF21005D)

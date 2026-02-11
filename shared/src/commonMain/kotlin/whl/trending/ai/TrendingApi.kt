@@ -11,8 +11,8 @@ import kotlinx.serialization.json.Json
 class TrendingApi {
     private val client = HttpClient {
         install(ContentNegotiation) {
-            json(Json { 
-                ignoreUnknownKeys = true 
+            json(Json {
+                ignoreUnknownKeys = true
                 coerceInputValues = true
             })
         }
@@ -36,8 +36,9 @@ class TrendingApi {
         val url = "$baseUrl/$endpoint/all.json"
         return try {
             val response = client.get(url)
-            response.body<List<TrendingRepo>>()
+            response.body<TrendingResponse>().data
         } catch (e: Exception) {
+            println(e)
             emptyList()
         }
     }
