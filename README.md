@@ -3,7 +3,7 @@
 > 🚧 **当前状态：项目正在积极开发中 (Work in Progress)**
 
 **「 洞察趋势，AI 领航 」**  
-*聚合 GitHub Trending 热门仓库，通过 AI 摘要技术，让核心价值触手可及。*
+*聚合 GitHub Trending 热门仓库，通过 AI 摘要技术，让核心价值触手及。*
 
 ---
 
@@ -15,12 +15,11 @@
 
 ---
 
-### 📥 立即下载
+## 📸 界面预览
 
-您可以在 GitHub 获取最新的安装包：
-
-- **Android**: [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases)
-- **iOS**: 🚀 *Coming Soon*
+| Android 预览 | iOS 预览 |
+| :---: | :---: |
+| <img src="assets/android_screenshot.png" width="300"> | <img src="assets/ios_screenshot.png" width="300"> |
 
 ---
 
@@ -31,11 +30,16 @@
 - 📱 **原生跨平台体验**：采用 Compose Multiplatform 构建，一套代码同时运行在 Android 和 iOS 平台。
 - 🎨 **Material 3 设计**：遵循 Google 最新 Material Design 3 规范，提供流畅的视觉交互。
 
-## 📸 界面预览
+---
 
-| Android 预览 | iOS 预览 |
-| :---: | :---: |
-| <img src="assets/android_screenshot.png" width="300"> | <img src="assets/ios_screenshot.png" width="300"> |
+### 📥 立即下载
+
+项目目前处于早期预览阶段，您可以前往 GitHub 下载最新的 Android 预览版进行体验（更多功能正持续迭代中）：
+
+- **Android**: [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases)
+- **iOS**: 🚀 *Coming Soon*
+
+---
 
 ## 🛠️ 技术栈
 
