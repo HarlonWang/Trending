@@ -34,7 +34,7 @@
 
 ### 📥 立即下载
 
-项目目前处于早期预览阶段，您可以前往 GitHub 下载最新的 Android 预览版进行体验（更多功能正持续迭代中）：
+项目目前处于早期预览阶段，您可以点击下载进行体验（更多功能正持续迭代中）：
 
 - **Android**: [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases)
 - **iOS**: 🚀 *Coming Soon*
