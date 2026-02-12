@@ -99,14 +99,6 @@ fun SettingsScreen(onBack: () -> Unit) {
                     }
                 }
             }
-            item {
-                ListItem(
-                    headlineContent = { Text("主题色彩") },
-                    supportingContent = { Text("自定义应用的主题颜色") },
-                    leadingContent = { Icon(Icons.Default.Palette, null) },
-                    modifier = Modifier.clickable { /* TODO */ }
-                )
-            }
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
             // 分组 2: 应用设置
