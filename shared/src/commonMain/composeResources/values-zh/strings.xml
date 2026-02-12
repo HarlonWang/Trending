@@ -12,6 +12,9 @@
     <string name="app_settings">应用设置</string>
     <string name="language_settings">语言设置</string>
     <string name="language_system_follow">跟随系统语言</string>
+    <string name="language_option_follow_system">跟随系统</string>
+    <string name="language_option_chinese">中文</string>
+    <string name="language_option_english">英文</string>
     <string name="open_system_settings">前往系统设置</string>
     <string name="datasource_settings">数据源设置</string>
     <string name="current_datasource">当前使用: Gemini API</string>

@@ -12,10 +12,10 @@ enum class ThemeMode(val title: String) {
     DARK("深色")
 }
 
-enum class AppLanguage(val title: String, val isoCode: String?) {
-    FOLLOW_SYSTEM("跟随系统", null),
-    CHINESE("简体中文", "zh"),
-    ENGLISH("English", "en")
+enum class AppLanguage(val isoCode: String?) {
+    FOLLOW_SYSTEM(null),
+    CHINESE("zh"),
+    ENGLISH("en")
 }
 
 class SettingsManager(private val settings: ObservableSettings) {

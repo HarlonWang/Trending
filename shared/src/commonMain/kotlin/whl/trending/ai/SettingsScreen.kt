@@ -50,6 +50,9 @@ import trending.shared.generated.resources.current_datasource
 import trending.shared.generated.resources.dark_mode
 import trending.shared.generated.resources.datasource_settings
 import trending.shared.generated.resources.language_settings
+import trending.shared.generated.resources.language_option_chinese
+import trending.shared.generated.resources.language_option_english
+import trending.shared.generated.resources.language_option_follow_system
 import trending.shared.generated.resources.language_system_follow
 import trending.shared.generated.resources.open_system_settings
 import trending.shared.generated.resources.personalization
@@ -157,7 +160,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                         trailingContent = {
                             Box {
                                 Text(
-                                    text = appLanguage.title,
+                                    text = languageOptionText(appLanguage),
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.clickable { expanded = true }
                                 )
@@ -167,7 +170,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                                 ) {
                                     AppLanguage.entries.forEach { language ->
                                         DropdownMenuItem(
-                                            text = { Text(language.title) },
+                                            text = { Text(languageOptionText(language)) },
                                             onClick = {
                                                 expanded = false
                                                 globalSettingsManager.setLanguage(language)
@@ -211,6 +214,16 @@ fun SettingsScreen(onBack: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun languageOptionText(language: AppLanguage): String {
+    val labelRes = when (language) {
+        AppLanguage.FOLLOW_SYSTEM -> Res.string.language_option_follow_system
+        AppLanguage.CHINESE -> Res.string.language_option_chinese
+        AppLanguage.ENGLISH -> Res.string.language_option_english
+    }
+    return stringResource(labelRes)
 }
 
 @Composable

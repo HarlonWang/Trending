@@ -12,6 +12,9 @@
     <string name="app_settings">App Settings</string>
     <string name="language_settings">Language</string>
     <string name="language_system_follow">Follow system language</string>
+    <string name="language_option_follow_system">Follow system</string>
+    <string name="language_option_chinese">Chinese</string>
+    <string name="language_option_english">English</string>
     <string name="open_system_settings">Open system settings</string>
     <string name="datasource_settings">Data Source</string>
     <string name="current_datasource">Current: Gemini API</string>
