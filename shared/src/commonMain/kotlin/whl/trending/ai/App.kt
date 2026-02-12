@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import trending.shared.generated.resources.GitHub_Invertocat_Black
@@ -167,6 +168,7 @@ fun App() {
                             onRefresh = {
                                 coroutineScope.launch {
                                     isRefreshing = true
+                                    delay(500)
                                     val refreshed = api.fetchTrending(tabs[pageIndex])
                                     when(pageIndex) {
                                         0 -> dailyData = refreshed
