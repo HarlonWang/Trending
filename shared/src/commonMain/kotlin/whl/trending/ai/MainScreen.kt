@@ -52,12 +52,21 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import trending.shared.generated.resources.GitHub_Invertocat_Black
 import trending.shared.generated.resources.GitHub_Invertocat_White
 import trending.shared.generated.resources.Res
+import trending.shared.generated.resources.app_name
 import trending.shared.generated.resources.deepseek_color
 import trending.shared.generated.resources.gemini_color
 import trending.shared.generated.resources.icon_flame
+import trending.shared.generated.resources.last_updated
+import trending.shared.generated.resources.no_data
+import trending.shared.generated.resources.settings
+import trending.shared.generated.resources.stars_since
+import trending.shared.generated.resources.tab_daily
+import trending.shared.generated.resources.tab_monthly
+import trending.shared.generated.resources.tab_weekly
 
 fun String.toColorOrNull(): Color? {
     val hex = this.removePrefix("#")
@@ -73,8 +82,13 @@ fun String.toColorOrNull(): Color? {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MainScreen(onNavigateToSettings: () -> Unit) {
-    val tabs = listOf("今日", "本周", "本月")
-    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val tabEndpoints = listOf("daily", "weekly", "monthly")
+    val tabTitles = listOf(
+        stringResource(Res.string.tab_daily),
+        stringResource(Res.string.tab_weekly),
+        stringResource(Res.string.tab_monthly)
+    )
+    val pagerState = rememberPagerState(pageCount = { tabTitles.size })
     val coroutineScope = rememberCoroutineScope()
     val api = remember { TrendingApi() }
     val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
@@ -89,15 +103,15 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
 
     LaunchedEffect(Unit) {
         dailyLoading = true
-        dailyData = api.fetchTrending("今日")
+        dailyData = api.fetchTrending(tabEndpoints[0])
         dailyLoading = false
 
         weeklyLoading = true
-        weeklyData = api.fetchTrending("本周")
+        weeklyData = api.fetchTrending(tabEndpoints[1])
         weeklyLoading = false
 
         monthlyLoading = true
-        monthlyData = api.fetchTrending("本月")
+        monthlyData = api.fetchTrending(tabEndpoints[2])
         monthlyLoading = false
     }
 
@@ -106,7 +120,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("Trending AI") },
+                title = { Text(stringResource(Res.string.app_name)) },
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = {}) {
@@ -125,7 +139,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                 },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings))
                     }
                 }
             )
@@ -137,7 +151,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                 .fillMaxSize()
         ) {
             PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
-                tabs.forEachIndexed { index, tabTitle ->
+                tabTitles.forEachIndexed { index, tabTitle ->
                     Tab(
                         selected = pagerState.currentPage == index,
                         onClick = {
@@ -176,7 +190,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                         coroutineScope.launch {
                             isRefreshing = true
                             delay(500)
-                            val refreshed = api.fetchTrending(tabs[pageIndex])
+                            val refreshed = api.fetchTrending(tabEndpoints[pageIndex])
                             when (pageIndex) {
                                 0 -> dailyData = refreshed
                                 1 -> weeklyData = refreshed
@@ -209,7 +223,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "暂无数据")
+                                Text(text = stringResource(Res.string.no_data))
                             }
                         }
 
@@ -312,7 +326,11 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Text(
-                                                text = "${repo.currentPeriodStars} stars ${repo.since}",
+                                                text = stringResource(
+                                                    Res.string.stars_since,
+                                                    repo.currentPeriodStars,
+                                                    repo.since
+                                                ),
                                                 fontSize = 14.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -325,7 +343,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                             if (data.updateAt.isNotEmpty()) {
                                 item {
                                     Text(
-                                        text = "最后更新于: ${data.updateAt}",
+                                        text = stringResource(Res.string.last_updated, data.updateAt),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 24.dp),

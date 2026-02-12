@@ -32,11 +32,11 @@ class TrendingApi {
     private val apiPrefix = "api/trending"
     private val archivePrefix = "archives"
 
-    suspend fun fetchTrending(type: String): TrendingResponse {
-        val endpoint = when(type) {
-            "今日" -> "daily"
-            "本周" -> "weekly"
-            "本月" -> "monthly"
+    suspend fun fetchTrending(period: String): TrendingResponse {
+        val endpoint = when (period.lowercase()) {
+            "daily" -> "daily"
+            "weekly" -> "weekly"
+            "monthly" -> "monthly"
             else -> "daily"
         }
 
