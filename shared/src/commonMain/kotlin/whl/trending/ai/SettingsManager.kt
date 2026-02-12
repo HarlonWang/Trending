@@ -1,5 +1,6 @@
 package whl.trending.ai
 
+import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.coroutines.getIntFlow
@@ -18,6 +19,7 @@ enum class AppLanguage(val isoCode: String?) {
     ENGLISH("en")
 }
 
+@OptIn(ExperimentalSettingsApi::class)
 class SettingsManager(private val settings: ObservableSettings) {
     private val THEME_KEY = "prefs_theme_mode"
     private val LANGUAGE_KEY = "prefs_language"
