@@ -50,6 +50,8 @@ import trending.shared.generated.resources.current_datasource
 import trending.shared.generated.resources.dark_mode
 import trending.shared.generated.resources.datasource_settings
 import trending.shared.generated.resources.language_settings
+import trending.shared.generated.resources.language_system_follow
+import trending.shared.generated.resources.open_system_settings
 import trending.shared.generated.resources.personalization
 import trending.shared.generated.resources.settings
 import trending.shared.generated.resources.theme_dark
@@ -59,6 +61,7 @@ import trending.shared.generated.resources.theme_light
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
+    val isIos = isIosPlatform()
     val themeMode by globalSettingsManager.themeMode.collectAsState(ThemeMode.FOLLOW_SYSTEM)
     val appLanguage by globalSettingsManager.appLanguage.collectAsState(AppLanguage.FOLLOW_SYSTEM)
 
@@ -134,37 +137,49 @@ fun SettingsScreen(onBack: () -> Unit) {
             // 分组 2: 应用设置
             item { SettingsHeader(stringResource(Res.string.app_settings)) }
             item {
-                var expanded by remember { mutableStateOf(false) }
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.language_settings)) },
-                    trailingContent = {
-                        Box {
+                if (isIos) {
+                    ListItem(
+                        headlineContent = { Text(stringResource(Res.string.language_settings)) },
+                        supportingContent = { Text(stringResource(Res.string.language_system_follow)) },
+                        trailingContent = {
                             Text(
-                                text = appLanguage.title,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable { expanded = true }
+                                text = stringResource(Res.string.open_system_settings),
+                                color = MaterialTheme.colorScheme.primary
                             )
-                            DropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                AppLanguage.entries.forEach { language ->
-                                    DropdownMenuItem(
-                                        text = { Text(language.title) },
-                                        onClick = {
-                                            expanded = false
-                                            globalSettingsManager.setLanguage(language)
-                                            if (isIosPlatform() && language != AppLanguage.FOLLOW_SYSTEM) {
-                                                openAppSettings()
+                        },
+                        leadingContent = { Icon(Icons.Default.Language, null) },
+                        modifier = Modifier.clickable { openAppSettings() }
+                    )
+                } else {
+                    var expanded by remember { mutableStateOf(false) }
+                    ListItem(
+                        headlineContent = { Text(stringResource(Res.string.language_settings)) },
+                        trailingContent = {
+                            Box {
+                                Text(
+                                    text = appLanguage.title,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.clickable { expanded = true }
+                                )
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    AppLanguage.entries.forEach { language ->
+                                        DropdownMenuItem(
+                                            text = { Text(language.title) },
+                                            onClick = {
+                                                expanded = false
+                                                globalSettingsManager.setLanguage(language)
                                             }
-                                        }
-                                    )
+                                        )
+                                    }
                                 }
                             }
-                        }
-                    },
-                    leadingContent = { Icon(Icons.Default.Language, null) }
-                )
+                        },
+                        leadingContent = { Icon(Icons.Default.Language, null) }
+                    )
+                }
             }
             item {
                 ListItem(

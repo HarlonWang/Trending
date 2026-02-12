@@ -13,7 +13,14 @@ actual fun getPlatform(): Platform = IOSPlatform()
 
 actual fun openAppSettings() {
     val url = NSURL(string = UIApplicationOpenSettingsURLString)
-    UIApplication.sharedApplication.openURL(url)
+    val app = UIApplication.sharedApplication
+    if (app.canOpenURL(url)) {
+        app.openURL(
+            url,
+            options = emptyMap<Any?, Any?>(),
+            completionHandler = { _ -> }
+        )
+    }
 }
 
 actual fun isIosPlatform(): Boolean = true

@@ -11,6 +11,8 @@
     <string name="theme_dark">Dark</string>
     <string name="app_settings">App Settings</string>
     <string name="language_settings">Language</string>
+    <string name="language_system_follow">Follow system language</string>
+    <string name="open_system_settings">Open system settings</string>
     <string name="datasource_settings">Data Source</string>
     <string name="current_datasource">Current: Gemini API</string>
     <string name="about">About</string>
