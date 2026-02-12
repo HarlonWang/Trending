@@ -7,3 +7,9 @@ class AndroidPlatform : Platform {
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
+
+actual fun openAppSettings() {
+    // Optional for Android
+}
+
+actual fun isIosPlatform(): Boolean = false

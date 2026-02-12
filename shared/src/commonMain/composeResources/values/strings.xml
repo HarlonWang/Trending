@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Trending AI</string>
+    <string name="tab_daily">Today</string>
+    <string name="tab_weekly">Weekly</string>
+    <string name="tab_monthly">Monthly</string>
+    <string name="settings">Settings</string>
+    <string name="personalization">Personalization</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="theme_follow_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="app_settings">App Settings</string>
+    <string name="language_settings">Language</string>
+    <string name="datasource_settings">Data Source</string>
+    <string name="current_datasource">Current: Gemini API</string>
+    <string name="about">About</string>
+    <string name="check_updates">Check Updates</string>
+    <string name="about_us">About Us</string>
+    <string name="about_us_desc">Learn more about Trending AI</string>
+    <string name="last_updated">Last updated at: %s</string>
+    <string name="no_data">No data available</string>
+    <string name="back">Back</string>
+</resources>

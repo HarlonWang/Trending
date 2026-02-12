@@ -1,6 +1,7 @@
 package whl.trending.ai
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,8 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,21 +32,43 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import trending.shared.generated.resources.Res
+import trending.shared.generated.resources.about
+import trending.shared.generated.resources.about_us
+import trending.shared.generated.resources.about_us_desc
+import trending.shared.generated.resources.app_settings
+import trending.shared.generated.resources.back
+import trending.shared.generated.resources.check_updates
+import trending.shared.generated.resources.current_datasource
+import trending.shared.generated.resources.dark_mode
+import trending.shared.generated.resources.datasource_settings
+import trending.shared.generated.resources.language_settings
+import trending.shared.generated.resources.personalization
+import trending.shared.generated.resources.settings
+import trending.shared.generated.resources.theme_dark
+import trending.shared.generated.resources.theme_follow_system
+import trending.shared.generated.resources.theme_light
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
     val themeMode by globalSettingsManager.themeMode.collectAsState(ThemeMode.FOLLOW_SYSTEM)
+    val appLanguage by globalSettingsManager.appLanguage.collectAsState(AppLanguage.FOLLOW_SYSTEM)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("设置") },
+                title = { Text(stringResource(Res.string.settings)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 }
             )
@@ -55,7 +80,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                 .fillMaxSize()
         ) {
             // 分组 1: 个性化
-            item { SettingsHeader("个性化") }
+            item { SettingsHeader(stringResource(Res.string.personalization)) }
             item {
                 Column(
                     modifier = Modifier
@@ -63,16 +88,16 @@ fun SettingsScreen(onBack: () -> Unit) {
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     Row(
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(bottom = 12.dp)
                     ) {
                         Icon(
                             Icons.Default.Palette,
-                            contentDescription = null,
+                            null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "深色模式",
+                            text = stringResource(Res.string.dark_mode),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 16.dp)
                         )
@@ -81,6 +106,11 @@ fun SettingsScreen(onBack: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         ThemeMode.entries.forEachIndexed { index, mode ->
+                            val labelRes = when (mode) {
+                                ThemeMode.FOLLOW_SYSTEM -> Res.string.theme_follow_system
+                                ThemeMode.LIGHT -> Res.string.theme_light
+                                ThemeMode.DARK -> Res.string.theme_dark
+                            }
                             SegmentedButton(
                                 selected = themeMode == mode,
                                 onClick = { globalSettingsManager.setThemeMode(mode) },
@@ -88,11 +118,11 @@ fun SettingsScreen(onBack: () -> Unit) {
                                     index = index,
                                     count = ThemeMode.entries.size
                                 ),
-                                label = { 
+                                label = {
                                     Text(
-                                        text = mode.title,
+                                        text = stringResource(labelRes),
                                         style = MaterialTheme.typography.labelMedium
-                                    ) 
+                                    )
                                 }
                             )
                         }
@@ -102,24 +132,44 @@ fun SettingsScreen(onBack: () -> Unit) {
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
             // 分组 2: 应用设置
-            item { SettingsHeader("应用设置") }
+            item { SettingsHeader(stringResource(Res.string.app_settings)) }
             item {
+                var expanded by remember { mutableStateOf(false) }
                 ListItem(
-                    headlineContent = { Text("语言设置") },
+                    headlineContent = { Text(stringResource(Res.string.language_settings)) },
                     trailingContent = {
-                        Text(
-                            "简体中文",
-                            color = MaterialTheme.colorScheme.outline
-                        )
+                        Box {
+                            Text(
+                                text = appLanguage.title,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable { expanded = true }
+                            )
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                AppLanguage.entries.forEach { language ->
+                                    DropdownMenuItem(
+                                        text = { Text(language.title) },
+                                        onClick = {
+                                            expanded = false
+                                            globalSettingsManager.setLanguage(language)
+                                            if (isIosPlatform() && language != AppLanguage.FOLLOW_SYSTEM) {
+                                                openAppSettings()
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     },
-                    leadingContent = { Icon(Icons.Default.Language, null) },
-                    modifier = Modifier.clickable { /* TODO */ }
+                    leadingContent = { Icon(Icons.Default.Language, null) }
                 )
             }
             item {
                 ListItem(
-                    headlineContent = { Text("数据源设置") },
-                    supportingContent = { Text("当前使用: Gemini API") },
+                    headlineContent = { Text(stringResource(Res.string.datasource_settings)) },
+                    supportingContent = { Text(stringResource(Res.string.current_datasource)) },
                     leadingContent = { Icon(Icons.Default.Storage, null) },
                     modifier = Modifier.clickable { /* TODO */ }
                 )
@@ -127,10 +177,10 @@ fun SettingsScreen(onBack: () -> Unit) {
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
             // 分组 3: 关于
-            item { SettingsHeader("关于") }
+            item { SettingsHeader(stringResource(Res.string.about)) }
             item {
                 ListItem(
-                    headlineContent = { Text("检查更新") },
+                    headlineContent = { Text(stringResource(Res.string.check_updates)) },
                     trailingContent = { Text("v1.0.0", color = MaterialTheme.colorScheme.outline) },
                     leadingContent = { Icon(Icons.Default.Refresh, null) },
                     modifier = Modifier.clickable { /* TODO */ }
@@ -138,8 +188,8 @@ fun SettingsScreen(onBack: () -> Unit) {
             }
             item {
                 ListItem(
-                    headlineContent = { Text("关于我们") },
-                    supportingContent = { Text("了解更多关于 Trending AI 的信息") },
+                    headlineContent = { Text(stringResource(Res.string.about_us)) },
+                    supportingContent = { Text(stringResource(Res.string.about_us_desc)) },
                     leadingContent = { Icon(Icons.Default.Info, null) },
                     modifier = Modifier.clickable { /* TODO */ }
                 )

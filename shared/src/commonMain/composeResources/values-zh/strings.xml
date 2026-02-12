@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Trending AI</string>
+    <string name="tab_daily">今日</string>
+    <string name="tab_weekly">本周</string>
+    <string name="tab_monthly">本月</string>
+    <string name="settings">设置</string>
+    <string name="personalization">个性化</string>
+    <string name="dark_mode">深色模式</string>
+    <string name="theme_follow_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="app_settings">应用设置</string>
+    <string name="language_settings">语言设置</string>
+    <string name="datasource_settings">数据源设置</string>
+    <string name="current_datasource">当前使用: Gemini API</string>
+    <string name="about">关于</string>
+    <string name="check_updates">检查更新</string>
+    <string name="about_us">关于我们</string>
+    <string name="about_us_desc">了解更多关于 Trending AI 的信息</string>
+    <string name="last_updated">最后更新于: %s</string>
+    <string name="no_data">暂无数据</string>
+    <string name="back">返回</string>
+</resources>

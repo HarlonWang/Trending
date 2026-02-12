@@ -12,14 +12,28 @@ enum class ThemeMode(val title: String) {
     DARK("深色")
 }
 
+enum class AppLanguage(val title: String, val isoCode: String?) {
+    FOLLOW_SYSTEM("跟随系统", null),
+    CHINESE("简体中文", "zh"),
+    ENGLISH("English", "en")
+}
+
 class SettingsManager(private val settings: ObservableSettings) {
     private val THEME_KEY = "prefs_theme_mode"
+    private val LANGUAGE_KEY = "prefs_language"
 
     val themeMode: Flow<ThemeMode> = settings.getIntFlow(THEME_KEY, ThemeMode.FOLLOW_SYSTEM.ordinal)
         .map { ThemeMode.entries.getOrElse(it) { ThemeMode.FOLLOW_SYSTEM } }
 
     fun setThemeMode(mode: ThemeMode) {
         settings.putInt(THEME_KEY, mode.ordinal)
+    }
+
+    val appLanguage: Flow<AppLanguage> = settings.getIntFlow(LANGUAGE_KEY, AppLanguage.FOLLOW_SYSTEM.ordinal)
+        .map { AppLanguage.entries.getOrElse(it) { AppLanguage.FOLLOW_SYSTEM } }
+
+    fun setLanguage(language: AppLanguage) {
+        settings.putInt(LANGUAGE_KEY, language.ordinal)
     }
 }
 
