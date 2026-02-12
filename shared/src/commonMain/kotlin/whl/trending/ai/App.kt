@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,11 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import trending.shared.generated.resources.GitHub_Invertocat_Black
@@ -71,6 +73,8 @@ fun App() {
     val coroutineScope = rememberCoroutineScope()
     val api = remember { TrendingApi() }
     
+    var showSettings by remember { mutableStateOf(false) }
+
     // Store data for each tab
     var dailyData by remember { mutableStateOf(TrendingResponse()) }
     var weeklyData by remember { mutableStateOf(TrendingResponse()) }
@@ -94,204 +98,213 @@ fun App() {
     }
 
     MaterialTheme {
-        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-        Scaffold(
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = {
-                TopAppBar(
-                    title = { Text("Trending AI") },
-                    scrollBehavior = scrollBehavior,
-                    navigationIcon = {
-                        IconButton(onClick = {}) {
-                            Icon(
-                                painter = painterResource(Res.drawable.GitHub_Invertocat_Black),
-                                contentDescription = "GitHub",
-                                modifier = Modifier.size(24.dp)
+        if (showSettings) {
+            SettingsScreen(onBack = { showSettings = false })
+        } else {
+            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+            Scaffold(
+                modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Trending AI") },
+                        scrollBehavior = scrollBehavior,
+                        navigationIcon = {
+                            IconButton(onClick = {}) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.GitHub_Invertocat_Black),
+                                    contentDescription = "GitHub",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { showSettings = true }) {
+                                Icon(Icons.Default.Settings, contentDescription = "Settings")
+                            }
+                        }
+                    )
+                },
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                ) {
+                    PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
+                        tabs.forEachIndexed { index, tabTitle ->
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                                text = { Text(tabTitle) }
                             )
                         }
                     }
-                )
-            },
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
-                    tabs.forEachIndexed { index, tabTitle ->
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = {
+
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { pageIndex ->
+                        val data = when (pageIndex) {
+                            0 -> dailyData
+                            1 -> weeklyData
+                            else -> monthlyData
+                        }
+                        val repos = data.data
+                        val isLoading = when (pageIndex) {
+                            0 -> dailyLoading
+                            1 -> weeklyLoading
+                            else -> monthlyLoading
+                        }
+
+                        var isRefreshing by remember { mutableStateOf(false) }
+
+                        PullToRefreshBox(
+                            isRefreshing = isRefreshing,
+                            onRefresh = {
                                 coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
+                                    isRefreshing = true
+                                    val refreshed = api.fetchTrending(tabs[pageIndex])
+                                    when(pageIndex) {
+                                        0 -> dailyData = refreshed
+                                        1 -> weeklyData = refreshed
+                                        else -> monthlyData = refreshed
+                                    }
+                                    isRefreshing = false
                                 }
                             },
-                            text = { Text(tabTitle) }
-                        )
-                    }
-                }
-
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize()
-                ) { pageIndex ->
-                    val data = when(pageIndex) {
-                        0 -> dailyData
-                        1 -> weeklyData
-                        else -> monthlyData
-                    }
-                    val repos = data.data
-                    val isLoading = when(pageIndex) {
-                        0 -> dailyLoading
-                        1 -> weeklyLoading
-                        else -> monthlyLoading
-                    }
-
-                    var isRefreshing by remember { mutableStateOf(false) }
-
-                    PullToRefreshBox(
-                        isRefreshing = isRefreshing,
-                        onRefresh = {
-                            coroutineScope.launch {
-                                isRefreshing = true
-                                val refreshed = api.fetchTrending(tabs[pageIndex])
-                                when(pageIndex) {
-                                    0 -> dailyData = refreshed
-                                    1 -> weeklyData = refreshed
-                                    else -> monthlyData = refreshed
-                                }
-                                isRefreshing = false
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        when {
-                            isLoading -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    LoadingIndicator(modifier = Modifier.size(48.dp))
-                                }
-                            }
-
-                            repos.isEmpty() -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "暂无数据")
-                                }
-                            }
-
-                            else -> LazyColumn(
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(
-                                    count = repos.size,
-                                    key = { index -> repos[index].url }
-                                ) { index ->
-                                    val repo = repos[index]
-                                    Row(
-                                        modifier = Modifier.padding(16.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            when {
+                                isLoading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Surface(
-                                            modifier = Modifier.size(28.dp),
-                                            shape = CircleShape,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            contentColor = MaterialTheme.colorScheme.onPrimary
-                                        ) {
-                                            Box(
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(text = "${index + 1}", fontSize = 12.sp, fontWeight = FontWeight.W500)
-                                            }
-                                        }
-                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            Text(
-                                                text = "${repo.author}/${repo.repoName}",
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.W500,
-                                                color = Color(0xFF1C1B1F)
-                                            )
-                                            Text(
-                                                text = repo.description,
-                                                fontSize = 14.sp,
-                                                lineHeight = 20.sp,
-                                                color = Color(0xFF49454F)
-                                            )
+                                        LoadingIndicator(modifier = Modifier.size(48.dp))
+                                    }
+                                }
 
-                                            if (!repo.aiSummary?.content.isNullOrEmpty()) {
-                                                Row(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .background(
-                                                            color = Color(0xFFE8DEF8),
-                                                            shape = RoundedCornerShape(12.dp)
-                                                        )
-                                                        .padding(12.dp),
-                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                    verticalAlignment = Alignment.Top
+                                repos.isEmpty() -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = "暂无数据")
+                                    }
+                                }
+
+                                else -> LazyColumn(
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    items(
+                                        count = repos.size,
+                                        key = { index -> repos[index].url }
+                                    ) { index ->
+                                        val repo = repos[index]
+                                        Row(
+                                            modifier = Modifier.padding(16.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        ) {
+                                            Surface(
+                                                modifier = Modifier.size(28.dp),
+                                                shape = CircleShape,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.Center
                                                 ) {
-                                                    // 对应图标可以从这里获取：https://lobehub.com/zh/icons
-                                                    val aiIcon = when (repo.aiSummary.source.lowercase()) {
-                                                        "gemini" -> Res.drawable.gemini_color
-                                                        "deepseek" -> Res.drawable.deepseek_color
-                                                        else -> Res.drawable.gemini_color
-                                                    }
-                                                    Icon(
-                                                        painter = painterResource(aiIcon),
-                                                        contentDescription = "AI-ICON",
-                                                        tint = Color.Unspecified,
-                                                        modifier = Modifier
-                                                            .size(16.dp)
-                                                            .padding(top = 2.dp)
-                                                    )
-                                                    Text(
-                                                        text = repo.aiSummary.content,
-                                                        fontSize = 14.sp,
-                                                        lineHeight = 20.sp,
-                                                        color = Color(0xFF21005D)
-                                                    )
+                                                    Text(text = "${index + 1}", fontSize = 12.sp, fontWeight = FontWeight.W500)
                                                 }
                                             }
-
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Surface(
-                                                    modifier = Modifier.size(12.dp),
-                                                    shape = CircleShape,
-                                                    color = repo.languageColor?.toColor() ?: Color.Gray
-                                                ) {}
-                                                Text(text = repo.language ?: "", fontSize = 14.sp, color = Color(0xFF49454F))
-                                                Icon(
-                                                    painter = painterResource(Res.drawable.icon_flame),
-                                                    contentDescription = "Flame",
-                                                    modifier = Modifier.size(16.dp)
+                                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                Text(
+                                                    text = "${repo.author}/${repo.repoName}",
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.W500,
+                                                    color = Color(0xFF1C1B1F)
                                                 )
-                                                Text(text = "${repo.currentPeriodStars} stars ${repo.since}", fontSize = 14.sp, color = Color(0xFF49454F))
+                                                Text(
+                                                    text = repo.description,
+                                                    fontSize = 14.sp,
+                                                    lineHeight = 20.sp,
+                                                    color = Color(0xFF49454F)
+                                                )
+
+                                                if (!repo.aiSummary?.content.isNullOrEmpty()) {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .background(
+                                                                color = Color(0xFFE8DEF8),
+                                                                shape = RoundedCornerShape(12.dp)
+                                                            )
+                                                            .padding(12.dp),
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                        verticalAlignment = Alignment.Top
+                                                    ) {
+                                                        // 对应图标可以从这里获取：https://lobehub.com/zh/icons
+                                                        val aiIcon = when (repo.aiSummary.source.lowercase()) {
+                                                            "gemini" -> Res.drawable.gemini_color
+                                                            "deepseek" -> Res.drawable.deepseek_color
+                                                            else -> Res.drawable.gemini_color
+                                                        }
+                                                        Icon(
+                                                            painter = painterResource(aiIcon),
+                                                            contentDescription = "AI-ICON",
+                                                            tint = Color.Unspecified,
+                                                            modifier = Modifier
+                                                                .size(16.dp)
+                                                                .padding(top = 2.dp)
+                                                        )
+                                                        Text(
+                                                            text = repo.aiSummary.content,
+                                                            fontSize = 14.sp,
+                                                            lineHeight = 20.sp,
+                                                            color = Color(0xFF21005D)
+                                                        )
+                                                    }
+                                                }
+
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Surface(
+                                                        modifier = Modifier.size(12.dp),
+                                                        shape = CircleShape,
+                                                        color = repo.languageColor?.toColor() ?: Color.Gray
+                                                    ) {}
+                                                    Text(text = repo.language ?: "", fontSize = 14.sp, color = Color(0xFF49454F))
+                                                    Icon(
+                                                        painter = painterResource(Res.drawable.icon_flame),
+                                                        contentDescription = "Flame",
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Text(text = "${repo.currentPeriodStars} stars ${repo.since}", fontSize = 14.sp, color = Color(0xFF49454F))
+                                                }
                                             }
                                         }
+                                        HorizontalDivider(modifier = Modifier.fillMaxWidth())
                                     }
-                                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
-                                }
 
-                                if (data.updateAt.isNotEmpty()) {
-                                    item {
-                                        Text(
-                                            text = "最后更新于: ${data.updateAt}",
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 24.dp),
-                                            textAlign = TextAlign.Center,
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.outline
-                                        )
+                                    if (data.updateAt.isNotEmpty()) {
+                                        item {
+                                            Text(
+                                                text = "最后更新于: ${data.updateAt}",
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 24.dp),
+                                                textAlign = TextAlign.Center,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.outline
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -299,7 +312,6 @@ fun App() {
                     }
                 }
             }
-
         }
     }
 }
