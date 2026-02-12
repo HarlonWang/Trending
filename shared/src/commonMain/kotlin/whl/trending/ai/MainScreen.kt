@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,17 +53,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import trending.shared.generated.resources.GitHub_Invertocat_Black
+import trending.shared.generated.resources.GitHub_Invertocat_White
 import trending.shared.generated.resources.Res
 import trending.shared.generated.resources.deepseek_color
 import trending.shared.generated.resources.gemini_color
 import trending.shared.generated.resources.icon_flame
 
-fun String.toColor(): Color {
+fun String.toColorOrNull(): Color? {
     val hex = this.removePrefix("#")
     return if (hex.length == 6) {
-        Color((hex.toLong(16) or 0xFF000000L).toInt())
+        runCatching {
+            Color((hex.toLong(16) or 0xFF000000L).toInt())
+        }.getOrNull()
     } else {
-        Color.Gray
+        null
     }
 }
 
@@ -73,6 +77,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
     val api = remember { TrendingApi() }
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     // Store data for each tab
     var dailyData by remember { mutableStateOf(TrendingResponse()) }
@@ -106,7 +111,13 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = {}) {
                         Icon(
-                            painter = painterResource(Res.drawable.GitHub_Invertocat_Black),
+                            painter = painterResource(
+                                if (isDarkTheme) {
+                                    Res.drawable.GitHub_Invertocat_White
+                                } else {
+                                    Res.drawable.GitHub_Invertocat_Black
+                                }
+                            ),
                             contentDescription = "GitHub",
                             modifier = Modifier.size(24.dp)
                         )
@@ -236,13 +247,13 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                             text = "${repo.author}/${repo.repoName}",
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.W500,
-                                            color = Color(0xFF1C1B1F)
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
                                             text = repo.description,
                                             fontSize = 14.sp,
                                             lineHeight = 20.sp,
-                                            color = Color(0xFF49454F)
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
 
                                         if (!repo.aiSummary?.content.isNullOrEmpty()) {
@@ -250,7 +261,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .background(
-                                                        color = Color(0xFFE8DEF8),
+                                                        color = MaterialTheme.colorScheme.secondaryContainer,
                                                         shape = RoundedCornerShape(12.dp)
                                                     )
                                                     .padding(12.dp),
@@ -275,7 +286,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                                     text = repo.aiSummary.content,
                                                     fontSize = 14.sp,
                                                     lineHeight = 20.sp,
-                                                    color = Color(0xFF21005D)
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
                                                 )
                                             }
                                         }
@@ -287,12 +298,13 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                             Surface(
                                                 modifier = Modifier.size(12.dp),
                                                 shape = CircleShape,
-                                                color = repo.languageColor?.toColor() ?: Color.Gray
+                                                color = repo.languageColor?.toColorOrNull()
+                                                    ?: MaterialTheme.colorScheme.outline
                                             ) {}
                                             Text(
                                                 text = repo.language ?: "",
                                                 fontSize = 14.sp,
-                                                color = Color(0xFF49454F)
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                             Icon(
                                                 painter = painterResource(Res.drawable.icon_flame),
@@ -302,7 +314,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                             Text(
                                                 text = "${repo.currentPeriodStars} stars ${repo.since}",
                                                 fontSize = 14.sp,
-                                                color = Color(0xFF49454F)
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
                                     }
