@@ -23,10 +23,10 @@ class TrendingApi {
         }
     }
 
-    // todo，暂时使用 jsdmirror 国内镜像源，后续可以根据所在国家区域切换源，
+    // todo，暂时使用 Cloudflare Pages 源，后续可以根据所在国家区域切换源，
     //  以及在设置页面支持切换不同源，例如国外可以走 jsDelivr 或者 githubusercontent
-    private val baseHost = "https://cdn.jsdmirror.com/gh/HarlonWang/github-ai-trending-api@main"
-    private val apiPrefix = "api/trending"
+    private val baseHost = "https://github-ai-trending-api.pages.dev"
+    private val apiPrefix = "trending"
 
     suspend fun fetchTrending(period: String): TrendingResponse {
         val endpoint = when (period.lowercase()) {
