@@ -329,7 +329,7 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                                 text = stringResource(
                                                     Res.string.stars_since,
                                                     repo.currentPeriodStars,
-                                                    repo.since
+                                                    data.since
                                                 ),
                                                 fontSize = 14.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -340,10 +340,10 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                 HorizontalDivider(modifier = Modifier.fillMaxWidth())
                             }
 
-                            if (data.updateAt.isNotEmpty()) {
+                            if (data.capturedAt.isNotEmpty()) {
                                 item {
                                     Text(
-                                        text = stringResource(Res.string.last_updated, data.updateAt),
+                                        text = stringResource(Res.string.last_updated, data.capturedAt),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 24.dp),

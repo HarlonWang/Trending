@@ -16,8 +16,6 @@ data class TrendingRepo(
     val forks: Int = 0,
     val currentPeriodStars: Int = 0,
     val builtBy: List<TrendingContributor> = emptyList(),
-    val since: String = "",
-    val fetchedAt: String? = null,
     val aiSummary: TrendingAiSummary? = null
 )
 
@@ -27,8 +25,9 @@ data class TrendingRepo(
 @Serializable
 data class TrendingResponse(
     val count: Int = 0,
-    @SerialName("update_at")
-    val updateAt: String = "",
+    val since: String = "",
+    @SerialName("captured_at")
+    val capturedAt: String = "",
     val data: List<TrendingRepo> = emptyList()
 )
 

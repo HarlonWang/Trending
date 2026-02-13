@@ -23,10 +23,7 @@ class TrendingApi {
         }
     }
 
-    // todo，暂时使用 Cloudflare Pages 源，后续可以根据所在国家区域切换源，
-    //  以及在设置页面支持切换不同源，例如国外可以走 jsDelivr 或者 githubusercontent
-    private val baseHost = "https://github-ai-trending-api.pages.dev"
-    private val apiPrefix = "trending"
+    private val baseHost = "https://api.trendingai.cn"
 
     suspend fun fetchTrending(period: String): TrendingResponse {
         val endpoint = when (period.lowercase()) {
@@ -36,7 +33,7 @@ class TrendingApi {
             else -> "daily"
         }
 
-        val url = "$baseHost/$apiPrefix/$endpoint/all.json"
+        val url = "$baseHost/trending/$endpoint/all.json"
         return try {
             val response = client.get(url)
             response.body<TrendingResponse>()
