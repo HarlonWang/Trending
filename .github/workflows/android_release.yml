@@ -43,11 +43,68 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
+      - name: Prepare APK Diff
+        id: diffuse
+        run: |
+          # 1. 下载并解压固定版本 diffuse 0.3.0
+          gh release download --repo JakeWharton/diffuse --tag 0.3.0 --pattern "diffuse-0.3.0.zip" --output diffuse.zip
+          unzip -q diffuse.zip
+          chmod +x diffuse-0.3.0/bin/diffuse
+
+          # 2. 获取上一个 Tag
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "${{ github.ref_name }}" | head -n 1)
+          
+          NEW_APK=$(find androidApp/build/outputs/apk/release -name "*.apk" | head -n 1)
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_ENV
+            
+            # 3. 下载旧版本 APK
+            mkdir -p old-apk
+            if gh release download "$PREVIOUS_TAG" -p "*.apk" --dir old-apk; then
+              OLD_APK=$(find old-apk -name "*.apk" | head -n 1)
+              
+              # 4. 运行对比并拆分报告
+              ./diffuse-0.3.0/bin/diffuse diff "$OLD_APK" "$NEW_APK" --text > full_diff.txt
+              
+              # 提取 Summary (第一个分割线之前)
+              sed -n '/^=================/q;p' full_diff.txt > summary.txt
+              # 提取 Details (第一个分割线之后)
+              sed -n '/^=================/,$p' full_diff.txt > details.txt
+              
+              {
+                echo "### 📦 APK 差异分析报告 (vs $PREVIOUS_TAG)"
+                echo "#### 📊 概览 (Summary)"
+                echo '```text'
+                cat summary.txt
+                echo '```'
+                if [ -s details.txt ]; then
+                  echo ""
+                  echo "<details><summary>🔍 点击查看详细变更 (Detailed Changes)</summary>"
+                  echo ""
+                  echo '```text'
+                  cat details.txt
+                  echo '```'
+                  echo "</details>"
+                fi
+              } > diff_report.md
+            else
+              echo "### 📦 APK 差异分析报告" > diff_report.md
+              echo "⚠️ 未能在上一个 Release ($PREVIOUS_TAG) 中找到 APK 文件进行对比。" >> diff_report.md
+            fi
+          else
+            echo "### 📦 APK 差异分析报告" > diff_report.md
+            echo "🆕 首次发布，无历史版本对比。" >> diff_report.md
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
+          body_path: diff_report.md
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
           files: |
