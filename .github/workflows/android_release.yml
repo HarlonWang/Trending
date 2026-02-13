@@ -82,6 +82,48 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compare Dependencies
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "${{ github.ref_name }}" | head -n 1)
+          if [ -n "$PREVIOUS_TAG" ]; then
+            git show "$PREVIOUS_TAG:gradle/libs.versions.toml" > old_libs.toml || touch old_libs.toml
+            python3 - <<EOF > dep_diff.md
+          import sys
+          if sys.version_info < (3, 11):
+              sys.exit(0)
+
+          import tomllib
+          def load_versions(path):
+              try:
+                  with open(path, "rb") as f:
+                      return tomllib.load(f).get("versions", {})
+              except: return {}
+
+          old_v = load_versions("old_libs.toml")
+          new_v = load_versions("gradle/libs.versions.toml")
+          
+          all_keys = sorted(set(old_v.keys()) | set(new_v.keys()))
+          changes = []
+          for k in all_keys:
+              old_val = old_v.get(k)
+              new_val = new_v.get(k)
+              if old_val != new_val:
+                  changes.append((k, old_val if old_val else "None", new_val if new_val else "Removed"))
+
+          if changes:
+              print("### Dependency Update\n")
+              print("| Dependency | Previous version | New version |")
+              print("| :--- | :--- | :--- |")
+              for name, old, new in changes:
+                  print(f"| {name} | {old} | {new} |")
+              print("\n")
+          EOF
+            if [ -s dep_diff.md ]; then
+              # 将依赖变更追加到 release_summary.md 的末尾
+              cat dep_diff.md >> release_summary.md
+            fi
+          fi
+
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
