@@ -65,7 +65,7 @@ jobs:
               OLD_APK=$(find old-apk -name "*.apk" | head -n 1)
               
               # 4. 运行对比并拆分报告
-              ./diffuse-0.3.0/bin/diffuse diff "$OLD_APK" "$NEW_APK" --text > full_diff.txt
+              ./diffuse-0.3.0/bin/diffuse diff "$OLD_APK" "$NEW_APK" > full_diff.txt
               
               # 提取 Summary (第一个分割线之前)
               sed -n '/^=================/q;p' full_diff.txt > summary.txt
