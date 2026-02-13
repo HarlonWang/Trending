@@ -47,7 +47,7 @@ jobs:
         id: diffuse
         run: |
           # 1. 下载并解压固定版本 diffuse 0.3.0
-          gh release download --repo JakeWharton/diffuse --tag 0.3.0 --pattern "diffuse-0.3.0.zip" --output diffuse.zip
+          gh release download 0.3.0 --repo JakeWharton/diffuse --pattern "diffuse-0.3.0.zip" --output diffuse.zip
           unzip -q diffuse.zip
           chmod +x diffuse-0.3.0/bin/diffuse
 
