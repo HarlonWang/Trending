@@ -24,6 +24,11 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Prepare Version Info
         run: |
           # 直接使用 tag 名称 (例如 1.0.0)
@@ -89,9 +94,6 @@ jobs:
             git show "$PREVIOUS_TAG:gradle/libs.versions.toml" > old_libs.toml || touch old_libs.toml
             python3 - <<EOF > dep_diff.md
           import sys
-          if sys.version_info < (3, 11):
-              sys.exit(0)
-
           import tomllib
           def load_versions(path):
               try:
