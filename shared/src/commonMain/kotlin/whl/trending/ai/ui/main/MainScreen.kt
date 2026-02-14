@@ -75,6 +75,7 @@ import trending.shared.generated.resources.filter_done
 import trending.shared.generated.resources.filter_language
 import trending.shared.generated.resources.filter_options
 import trending.shared.generated.resources.filter_period
+import trending.shared.generated.resources.filter_reset
 import trending.shared.generated.resources.gemini_color
 import trending.shared.generated.resources.icon_flame
 import trending.shared.generated.resources.last_updated
@@ -455,11 +456,25 @@ private fun FilterBottomSheet(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = { onConfirm(tempPeriod, tempLanguage) },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(stringResource(Res.string.filter_done))
+                androidx.compose.material3.OutlinedButton(
+                    onClick = {
+                        onConfirm("daily", "all")
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(Res.string.filter_reset))
+                }
+
+                Button(
+                    onClick = { onConfirm(tempPeriod, tempLanguage) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(Res.string.filter_done))
+                }
             }
         }
     }

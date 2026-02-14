@@ -32,4 +32,5 @@
     <string name="filter_period">Period</string>
     <string name="filter_language">Language</string>
     <string name="filter_done">Done</string>
+    <string name="filter_reset">Reset</string>
 </resources>
