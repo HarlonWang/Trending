@@ -25,6 +25,8 @@
     <string name="last_updated">Last updated at: %1$s</string>
     <string name="stars_since">%1$d stars %2$s</string>
     <string name="no_data">No data available</string>
+    <string name="retry">Retry</string>
+    <string name="error_fetch">Failed to fetch data: %1$s</string>
     <string name="back">Back</string>
     <string name="filter_options">Filter Options</string>
     <string name="filter_period">Period</string>

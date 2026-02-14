@@ -37,16 +37,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,8 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import trending.shared.generated.resources.GitHub_Invertocat_Black
@@ -66,6 +65,7 @@ import trending.shared.generated.resources.GitHub_Invertocat_White
 import trending.shared.generated.resources.Res
 import trending.shared.generated.resources.app_name
 import trending.shared.generated.resources.deepseek_color
+import trending.shared.generated.resources.error_fetch
 import trending.shared.generated.resources.filter_done
 import trending.shared.generated.resources.filter_language
 import trending.shared.generated.resources.filter_options
@@ -74,13 +74,391 @@ import trending.shared.generated.resources.gemini_color
 import trending.shared.generated.resources.icon_flame
 import trending.shared.generated.resources.last_updated
 import trending.shared.generated.resources.no_data
+import trending.shared.generated.resources.retry
 import trending.shared.generated.resources.settings
 import trending.shared.generated.resources.stars_since
 import trending.shared.generated.resources.tab_daily
 import trending.shared.generated.resources.tab_monthly
 import trending.shared.generated.resources.tab_weekly
 
-fun String.toColorOrNull(): Color? {
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun MainScreen(
+    onNavigateToSettings: () -> Unit,
+    viewModel: MainViewModel = viewModel { MainViewModel() }
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var showFilterSheet by remember { mutableStateOf(false) }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            TrendingTopBar(
+                selectedPeriod = uiState.selectedPeriod,
+                selectedLanguage = uiState.selectedLanguage,
+                scrollBehavior = scrollBehavior,
+                onTitleClick = { showFilterSheet = true },
+                onNavigateToSettings = onNavigateToSettings
+            )
+        },
+    ) { innerPadding ->
+        RepoList(
+            uiState = uiState,
+            modifier = Modifier.padding(innerPadding),
+            onRefresh = { viewModel.fetchData(isRefresh = true) }
+        )
+    }
+
+    if (showFilterSheet) {
+        FilterBottomSheet(
+            selectedPeriod = uiState.selectedPeriod,
+            selectedLanguage = uiState.selectedLanguage,
+            onDismiss = { showFilterSheet = false },
+            onConfirm = { period, language ->
+                viewModel.updateFilter(period, language)
+                showFilterSheet = false
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TrendingTopBar(
+    selectedPeriod: String,
+    selectedLanguage: String,
+    scrollBehavior: TopAppBarScrollBehavior,
+    onTitleClick: () -> Unit,
+    onNavigateToSettings: () -> Unit
+) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val periodLabel = when (selectedPeriod) {
+        "daily" -> stringResource(Res.string.tab_daily)
+        "weekly" -> stringResource(Res.string.tab_weekly)
+        "monthly" -> stringResource(Res.string.tab_monthly)
+        else -> selectedPeriod
+    }
+
+    TopAppBar(
+        title = {
+            Column(
+                modifier = Modifier
+                    .clickable { onTitleClick() }
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(Res.string.app_name),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp).padding(start = 4.dp)
+                    )
+                }
+                Text(
+                    text = "$periodLabel · ${selectedLanguage.replaceFirstChar { it.uppercase() }}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        scrollBehavior = scrollBehavior,
+        navigationIcon = {
+            IconButton(onClick = {}) {
+                Icon(
+                    painter = painterResource(
+                        if (isDarkTheme) Res.drawable.GitHub_Invertocat_White
+                        else Res.drawable.GitHub_Invertocat_Black
+                    ),
+                    contentDescription = "GitHub",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = onNavigateToSettings) {
+                Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings))
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun RepoList(
+    uiState: MainUiState,
+    modifier: Modifier = Modifier,
+    onRefresh: () -> Unit
+) {
+    val state = rememberPullToRefreshState()
+    
+    PullToRefreshBox(
+        isRefreshing = uiState.isRefreshing,
+        state = state,
+        onRefresh = onRefresh,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = state,
+                isRefreshing = uiState.isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        },
+        modifier = modifier.fillMaxSize()
+    ) {
+        when {
+            uiState.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LoadingIndicator(modifier = Modifier.size(48.dp))
+                }
+            }
+
+            uiState.error != null -> {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(Res.string.error_fetch, uiState.error),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = onRefresh) {
+                        Text(stringResource(Res.string.retry))
+                    }
+                }
+            }
+
+            uiState.repos.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = stringResource(Res.string.no_data))
+                }
+            }
+
+            else -> LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(
+                    count = uiState.repos.size,
+                    key = { index -> uiState.repos[index].url }
+                ) { index ->
+                    RepoItem(index = index, repo = uiState.repos[index], since = uiState.since)
+                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                }
+
+                if (uiState.capturedAt.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(Res.string.last_updated, uiState.capturedAt),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                            textAlign = TextAlign.Center,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RepoItem(index: Int, repo: TrendingRepo, since: String) {
+    Row(
+        modifier = Modifier.padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Surface(
+            modifier = Modifier.size(28.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "${index + 1}", fontSize = 12.sp, fontWeight = FontWeight.W500)
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "${repo.author}/${repo.repoName}",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.W500,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = repo.description,
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            repo.aiSummary?.let { summary ->
+                if (summary.content.isNotEmpty()) {
+                    AiSummaryBox(summary)
+                }
+            }
+
+            RepoMetadata(repo = repo, since = since)
+        }
+    }
+}
+
+@Composable
+private fun AiSummaryBox(aiSummary: TrendingAiSummary) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        val aiIcon = when (aiSummary.source.lowercase()) {
+            "gemini" -> Res.drawable.gemini_color
+            "deepseek" -> Res.drawable.deepseek_color
+            else -> Res.drawable.gemini_color
+        }
+        Icon(
+            painter = painterResource(aiIcon),
+            contentDescription = "AI-ICON",
+            tint = Color.Unspecified,
+            modifier = Modifier.size(16.dp).padding(top = 2.dp)
+        )
+        Text(
+            text = aiSummary.content,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
+}
+
+@Composable
+private fun RepoMetadata(repo: TrendingRepo, since: String) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            modifier = Modifier.size(12.dp),
+            shape = CircleShape,
+            color = repo.languageColor?.toColorOrNull() ?: MaterialTheme.colorScheme.outline
+        ) {}
+        Text(
+            text = repo.language ?: "",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Icon(
+            painter = painterResource(Res.drawable.icon_flame),
+            contentDescription = "Flame",
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            text = stringResource(Res.string.stars_since, repo.currentPeriodStars, since),
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun FilterBottomSheet(
+    selectedPeriod: String,
+    selectedLanguage: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String) -> Unit
+) {
+    val periods = listOf("daily", "weekly", "monthly")
+    val languages = listOf("all", "javascript", "java", "go", "rust", "typescript", "c++", "c", "swift", "kotlin")
+    
+    var tempPeriod by remember { mutableStateOf(selectedPeriod) }
+    var tempLanguage by remember { mutableStateOf(selectedLanguage) }
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.filter_options),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            Text(
+                text = stringResource(Res.string.filter_period),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                periods.forEachIndexed { index, period ->
+                    val label = when (period) {
+                        "daily" -> stringResource(Res.string.tab_daily)
+                        "weekly" -> stringResource(Res.string.tab_weekly)
+                        "monthly" -> stringResource(Res.string.tab_monthly)
+                        else -> period
+                    }
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = periods.size),
+                        onClick = { tempPeriod = period },
+                        selected = tempPeriod == period
+                    ) { Text(label) }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(Res.string.filter_language),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                languages.forEach { language ->
+                    FilterChip(
+                        selected = tempLanguage == language,
+                        onClick = { tempLanguage = language },
+                        label = { Text(language.replaceFirstChar { it.uppercase() }) },
+                        leadingIcon = null
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = { onConfirm(tempPeriod, tempLanguage) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(Res.string.filter_done))
+            }
+        }
+    }
+}
+
+private fun String.toColorOrNull(): Color? {
     val hex = this.removePrefix("#")
     return if (hex.length == 6) {
         runCatching {
@@ -88,363 +466,5 @@ fun String.toColorOrNull(): Color? {
         }.getOrNull()
     } else {
         null
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun MainScreen(onNavigateToSettings: () -> Unit) {
-    val periods = listOf("daily", "weekly", "monthly")
-    val languages = listOf(
-        "all", "javascript", "java", "go", "rust",
-        "typescript", "c++", "c", "swift", "kotlin"
-    )
-
-    var selectedPeriod by remember { mutableStateOf(periods[0]) }
-    var selectedLanguage by remember { mutableStateOf(languages[0]) }
-    var showFilterSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-
-    val coroutineScope = rememberCoroutineScope()
-    val api = remember { TrendingApi() }
-    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
-
-    var trendingData by remember { mutableStateOf(TrendingResponse()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isRefreshing by remember { mutableStateOf(false) }
-
-    val fetchData = suspend {
-        val data = api.fetchTrending(selectedPeriod, selectedLanguage)
-        trendingData = data
-    }
-
-    LaunchedEffect(selectedPeriod, selectedLanguage) {
-        isLoading = true
-        fetchData()
-        isLoading = false
-    }
-
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            val periodLabel = when (selectedPeriod) {
-                "daily" -> stringResource(Res.string.tab_daily)
-                "weekly" -> stringResource(Res.string.tab_weekly)
-                "monthly" -> stringResource(Res.string.tab_monthly)
-                else -> selectedPeriod
-            }
-
-            TopAppBar(
-                title = {
-                    Column(
-                        modifier = Modifier
-                            .clickable { showFilterSheet = true }
-                            .padding(vertical = 4.dp),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = stringResource(Res.string.app_name),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp).padding(start = 4.dp)
-                            )
-                        }
-                        Text(
-                            text = "$periodLabel · ${selectedLanguage.replaceFirstChar { it.uppercase() }}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            painter = painterResource(
-                                if (isDarkTheme) {
-                                    Res.drawable.GitHub_Invertocat_White
-                                } else {
-                                    Res.drawable.GitHub_Invertocat_Black
-                                }
-                            ),
-                            contentDescription = "GitHub",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings))
-                    }
-                }
-            )
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            val state = rememberPullToRefreshState()
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                state = state,
-                onRefresh = {
-                    coroutineScope.launch {
-                        isRefreshing = true
-                        delay(500)
-                        fetchData()
-                        isRefreshing = false
-                    }
-                },
-                indicator = {
-                    PullToRefreshDefaults.LoadingIndicator(
-                        state = state,
-                        isRefreshing = isRefreshing,
-                        modifier = Modifier.align(Alignment.TopCenter),
-                    )
-                },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                when {
-                    isLoading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LoadingIndicator(modifier = Modifier.size(48.dp))
-                        }
-                    }
-
-                    trendingData.data.isEmpty() -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = stringResource(Res.string.no_data))
-                        }
-                    }
-
-                    else -> LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(
-                            count = trendingData.data.size,
-                            key = { index -> trendingData.data[index].url }
-                        ) { index ->
-                            val repo = trendingData.data[index]
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Surface(
-                                    modifier = Modifier.size(28.dp),
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ) {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "${index + 1}",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.W500
-                                        )
-                                    }
-                                }
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(
-                                        text = "${repo.author}/${repo.repoName}",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.W500,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = repo.description,
-                                        fontSize = 14.sp,
-                                        lineHeight = 20.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-
-                                    if (!repo.aiSummary?.content.isNullOrEmpty()) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .background(
-                                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                                    shape = RoundedCornerShape(12.dp)
-                                                )
-                                                .padding(12.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.Top
-                                        ) {
-                                            val aiIcon =
-                                                when (repo.aiSummary.source.lowercase()) {
-                                                    "gemini" -> Res.drawable.gemini_color
-                                                    "deepseek" -> Res.drawable.deepseek_color
-                                                    else -> Res.drawable.gemini_color
-                                                }
-                                            Icon(
-                                                painter = painterResource(aiIcon),
-                                                contentDescription = "AI-ICON",
-                                                tint = Color.Unspecified,
-                                                modifier = Modifier
-                                                    .size(16.dp)
-                                                    .padding(top = 2.dp)
-                                            )
-                                            Text(
-                                                text = repo.aiSummary.content,
-                                                fontSize = 14.sp,
-                                                lineHeight = 20.sp,
-                                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                        }
-                                    }
-
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Surface(
-                                            modifier = Modifier.size(12.dp),
-                                            shape = CircleShape,
-                                            color = repo.languageColor?.toColorOrNull()
-                                                ?: MaterialTheme.colorScheme.outline
-                                        ) {}
-                                        Text(
-                                            text = repo.language ?: "",
-                                            fontSize = 14.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Icon(
-                                            painter = painterResource(Res.drawable.icon_flame),
-                                            contentDescription = "Flame",
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text(
-                                            text = stringResource(
-                                                Res.string.stars_since,
-                                                repo.currentPeriodStars,
-                                                trendingData.since
-                                            ),
-                                            fontSize = 14.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                            HorizontalDivider(modifier = Modifier.fillMaxWidth())
-                        }
-
-                        if (trendingData.capturedAt.isNotEmpty()) {
-                            item {
-                                Text(
-                                    text = stringResource(Res.string.last_updated, trendingData.capturedAt),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 24.dp),
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (showFilterSheet) {
-        var tempPeriod by remember { mutableStateOf(selectedPeriod) }
-        var tempLanguage by remember { mutableStateOf(selectedLanguage) }
-
-        ModalBottomSheet(
-            onDismissRequest = { showFilterSheet = false },
-            sheetState = sheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 32.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.filter_options),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                Text(
-                    text = stringResource(Res.string.filter_period),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    periods.forEachIndexed { index, period ->
-                        val label = when (period) {
-                            "daily" -> stringResource(Res.string.tab_daily)
-                            "weekly" -> stringResource(Res.string.tab_weekly)
-                            "monthly" -> stringResource(Res.string.tab_monthly)
-                            else -> period
-                        }
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(index = index, count = periods.size),
-                            onClick = { tempPeriod = period },
-                            selected = tempPeriod == period
-                        ) {
-                            Text(label)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = stringResource(Res.string.filter_language),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    languages.forEach { language ->
-                        FilterChip(
-                            selected = tempLanguage == language,
-                            onClick = { tempLanguage = language },
-                            label = { Text(language.replaceFirstChar { it.uppercase() }) },
-                            leadingIcon = null
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = { 
-                        selectedPeriod = tempPeriod
-                        selectedLanguage = tempLanguage
-                        showFilterSheet = false 
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(Res.string.filter_done))
-                }
-            }
-        }
     }
 }

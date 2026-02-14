@@ -8,7 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-class TrendingApi {
+open class TrendingApi {
     private val client = HttpClient {
         install(ContentNegotiation) {
             json(Json {
@@ -25,7 +25,7 @@ class TrendingApi {
 
     private val baseHost = "https://api.trendingai.cn"
 
-    suspend fun fetchTrending(period: String, language: String): TrendingResponse {
+    open suspend fun fetchTrending(period: String, language: String): TrendingResponse {
         val endpoint = when (period.lowercase()) {
             "daily", "weekly", "monthly" -> period.lowercase()
             else -> "daily"
@@ -33,12 +33,7 @@ class TrendingApi {
         val lang = language.lowercase()
 
         val url = "$baseHost/trending/$endpoint/$lang.json"
-        return try {
-            val response = client.get(url)
-            response.body<TrendingResponse>()
-        } catch (e: Exception) {
-            println("Fetch failed: ${e.message}")
-            TrendingResponse()
-        }
+        val response = client.get(url)
+        return response.body<TrendingResponse>()
     }
 }
