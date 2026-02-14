@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -28,7 +26,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -131,8 +128,39 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
+            val periodLabel = when (selectedPeriod) {
+                "daily" -> stringResource(Res.string.tab_daily)
+                "weekly" -> stringResource(Res.string.tab_weekly)
+                "monthly" -> stringResource(Res.string.tab_monthly)
+                else -> selectedPeriod
+            }
+
             TopAppBar(
-                title = { Text(stringResource(Res.string.app_name)) },
+                title = {
+                    Column(
+                        modifier = Modifier
+                            .clickable { showFilterSheet = true }
+                            .padding(vertical = 4.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = stringResource(Res.string.app_name),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp).padding(start = 4.dp)
+                            )
+                        }
+                        Text(
+                            text = "$periodLabel · ${selectedLanguage.replaceFirstChar { it.uppercase() }}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = {}) {
@@ -162,39 +190,6 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            // Compact Filter Trigger
-            val periodLabel = when (selectedPeriod) {
-                "daily" -> stringResource(Res.string.tab_daily)
-                "weekly" -> stringResource(Res.string.tab_weekly)
-                "monthly" -> stringResource(Res.string.tab_monthly)
-                else -> selectedPeriod
-            }
-            
-            ListItem(
-                headlineContent = { 
-                    Text(
-                        text = "$periodLabel · ${selectedLanguage.replaceFirstChar { it.uppercase() }}",
-                        style = MaterialTheme.typography.labelLarge
-                    ) 
-                },
-                leadingContent = { 
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    ) 
-                },
-                trailingContent = { 
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null
-                    ) 
-                },
-                modifier = Modifier.clickable { showFilterSheet = true }
-            )
-
-            HorizontalDivider()
-
             val state = rememberPullToRefreshState()
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
