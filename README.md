@@ -49,7 +49,46 @@
 - **序列化**: [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization)
 - **UI 组件**: Material 3 (Expressive API)
 
-## 📂 项目结构
-- `shared`: 核心逻辑模块，包含 UI (Compose)、API 请求、数据模型等。
-- `androidApp`: Android 原生入口。
-- `iosApp`: iOS 原生入口（SwiftUI 包装）。
+---
+
+## 📂 项目结构与架构
+
+项目采用**分层架构 (Layered Architecture)**，结合 Android 官方最佳实践进行分包，确保逻辑解耦与良好的测试性。
+
+### 核心分层说明
+
+```text
+shared/src/commonMain/kotlin/whl/trending/ai/
+├── core/                   # 核心基础设施 (Infrastructure)
+│   ├── platform/           # 跨平台适配 (expect/actual)
+│   ├── theme/              # 全局 UI 规范 (Theme, Color)
+│   └── App.kt              # 应用入口与全局路由导航
+├── data/                   # 数据层 (Data Layer)
+│   ├── model/              # 数据实体 (DTO / Entity)
+│   ├── remote/             # 远程数据源 (Ktor API 实现)
+│   ├── local/              # 本地持久化 (Preferences / Settings)
+│   └── repository/         # 存储库 (Repository - 业务逻辑入口)
+└── ui/                     # 表现层 (Presentation Layer)
+    ├── main/               # 首页趋势列表 (Screen & ViewModel)
+    ├── settings/           # 设置模块
+    └── component/          # 全局公共 UI 组件
+```
+
+### 协作规范与约定
+
+为了保持代码库的整洁与可维护性，后续开发请遵循以下约定：
+
+1.  **数据流向**：
+    *   **UI (Screen)** ↔️ **ViewModel** ↔️ **Repository** ↔️ **API/Local Source**。
+    *   严禁在 ViewModel 中直接持有 API 实例，必须通过 `Repository` 进行数据抽象。
+2.  **状态管理**：
+    *   使用 `androidx.lifecycle.ViewModel` 管理页面级状态。
+    *   UI 状态统一建模为 `data class UiState`，并通过 `StateFlow` 暴露给 Compose 组件。
+3.  **UI 组件化**：
+    *   大型页面（如 `MainScreen`）必须拆分为私有小型 Composable 函数。
+    *   通用组件放入 `ui/component` 目录下。
+4.  **跨平台处理**：
+    *   平台相关逻辑优先考虑在 `core/platform` 下定义 `expect` 方法。
+5.  **单元测试**：
+    *   新的 ViewModel 逻辑必须在 `commonTest` 对应路径下提供测试用例（如 `MainViewModelTest`）。
+    *   测试应覆盖初始加载、错误处理以及并发请求场景。

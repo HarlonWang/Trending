@@ -1,4 +1,7 @@
-package whl.trending.ai
+package whl.trending.ai.ui.main
+
+import whl.trending.ai.data.model.TrendingRepo
+import whl.trending.ai.data.repository.TrendingRepository
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,7 +24,7 @@ data class MainUiState(
     val error: String? = null
 )
 
-class MainViewModel(private val api: TrendingApi = TrendingApi()) : ViewModel() {
+class MainViewModel(private val repository: TrendingRepository = TrendingRepository()) : ViewModel() {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
@@ -42,7 +45,7 @@ class MainViewModel(private val api: TrendingApi = TrendingApi()) : ViewModel() 
             }
 
             try {
-                val response = api.fetchTrending(_uiState.value.selectedPeriod, _uiState.value.selectedLanguage)
+                val response = repository.getTrending(_uiState.value.selectedPeriod, _uiState.value.selectedLanguage)
                 _uiState.update { 
                     it.copy(
                         repos = response.data,

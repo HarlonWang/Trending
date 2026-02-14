@@ -1,4 +1,9 @@
-package whl.trending.ai
+package whl.trending.ai.core
+
+import whl.trending.ai.ui.main.MainScreen
+import whl.trending.ai.ui.settings.SettingsScreen
+import whl.trending.ai.data.local.ThemeMode
+import whl.trending.ai.data.local.globalSettingsManager
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

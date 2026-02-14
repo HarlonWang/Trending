@@ -1,4 +1,4 @@
-package whl.trending.ai
+package whl.trending.ai.core.platform
 
 interface Platform {
     val name: String

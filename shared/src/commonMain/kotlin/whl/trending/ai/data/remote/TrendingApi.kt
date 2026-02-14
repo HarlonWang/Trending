@@ -1,4 +1,6 @@
-package whl.trending.ai
+package whl.trending.ai.data.remote
+
+import whl.trending.ai.data.model.TrendingResponse
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

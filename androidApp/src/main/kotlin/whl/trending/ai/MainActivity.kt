@@ -11,6 +11,9 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import whl.trending.ai.core.App
+import whl.trending.ai.data.local.AppLanguage
+import whl.trending.ai.data.local.globalSettingsManager
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

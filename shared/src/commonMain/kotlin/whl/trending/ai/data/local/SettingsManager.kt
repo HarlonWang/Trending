@@ -1,4 +1,4 @@
-package whl.trending.ai
+package whl.trending.ai.data.local
 
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.ObservableSettings

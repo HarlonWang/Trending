@@ -1,4 +1,7 @@
-package whl.trending.ai
+package whl.trending.ai.ui.main
+
+import whl.trending.ai.data.model.TrendingRepo
+import whl.trending.ai.data.model.TrendingAiSummary
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons

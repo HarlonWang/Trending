@@ -1,4 +1,4 @@
-package whl.trending.ai
+package whl.trending.ai.core.platform
 
 import platform.UIKit.UIDevice
 import platform.UIKit.UIApplication

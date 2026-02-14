@@ -1,4 +1,4 @@
-package whl.trending.ai
+package whl.trending.ai.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -1,4 +1,10 @@
-package whl.trending.ai
+package whl.trending.ai.ui.settings
+
+import whl.trending.ai.data.local.AppLanguage
+import whl.trending.ai.data.local.ThemeMode
+import whl.trending.ai.data.local.globalSettingsManager
+import whl.trending.ai.core.platform.isIosPlatform
+import whl.trending.ai.core.platform.openAppSettings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

@@ -1,4 +1,4 @@
-package whl.trending.ai
+package whl.trending.ai.core
 
 import androidx.compose.ui.window.ComposeUIViewController
 

@@ -1,5 +1,9 @@
-package whl.trending.ai
+package whl.trending.ai.ui.main
 
+import whl.trending.ai.data.model.TrendingRepo
+import whl.trending.ai.data.model.TrendingResponse
+import whl.trending.ai.data.remote.TrendingApi
+import whl.trending.ai.data.repository.TrendingRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -38,11 +42,9 @@ class MainViewModelTest {
         private var shouldFail: Boolean = false
     ) : TrendingApi() {
         var callCount = 0
-        var lastPeriod: String? = null
 
         override suspend fun fetchTrending(period: String, language: String): TrendingResponse {
             callCount++
-            lastPeriod = period
             if (responseDelay > 0) delay(responseDelay)
             if (shouldFail) throw Exception("Network Error")
             
@@ -51,18 +53,15 @@ class MainViewModelTest {
                 since = period
             )
         }
-        
-        fun setFail(fail: Boolean) {
-            shouldFail = fail
-        }
     }
 
     @Test
     fun testInitialFetchSuccess() = runTest {
         val fakeApi = FakeTrendingApi()
-        val viewModel = MainViewModel(fakeApi)
+        val repo = TrendingRepository(fakeApi)
+        val viewModel = MainViewModel(repo)
 
-        // Initially loading (since fetchData is called in init)
+        // Initially loading
         assertTrue(viewModel.uiState.value.isLoading)
 
         advanceUntilIdle()
@@ -76,7 +75,8 @@ class MainViewModelTest {
     @Test
     fun testFetchError() = runTest {
         val fakeApi = FakeTrendingApi(shouldFail = true)
-        val viewModel = MainViewModel(fakeApi)
+        val repo = TrendingRepository(fakeApi)
+        val viewModel = MainViewModel(repo)
 
         advanceUntilIdle()
 
@@ -89,24 +89,19 @@ class MainViewModelTest {
     @Test
     fun testConcurrencyRaceCondition() = runTest {
         val fakeApi = FakeTrendingApi(responseDelay = 1000)
-        val viewModel = MainViewModel(fakeApi)
+        val repo = TrendingRepository(fakeApi)
+        val viewModel = MainViewModel(repo)
 
-        // Initially, first call is made by init block
-        // Move time forward a bit
         advanceTimeBy(100) 
         assertEquals(1, fakeApi.callCount)
 
-        // Trigger a new filter update which should cancel the first one
         viewModel.updateFilter("weekly", "all")
         
-        // Give the second call a chance to start and reach its delay
         advanceTimeBy(100)
         assertEquals(2, fakeApi.callCount)
 
-        // Complete all coroutines
         advanceUntilIdle()
 
-        // State should reflect the second call's data
         assertEquals("weekly", viewModel.uiState.value.selectedPeriod)
         assertEquals("Repo for weekly", viewModel.uiState.value.repos[0].repoName)
         assertNull(viewModel.uiState.value.error)
@@ -115,13 +110,11 @@ class MainViewModelTest {
     @Test
     fun testRefreshState() = runTest {
         val fakeApi = FakeTrendingApi(responseDelay = 1000)
-        val viewModel = MainViewModel(fakeApi)
+        val repo = TrendingRepository(fakeApi)
+        val viewModel = MainViewModel(repo)
         advanceUntilIdle()
 
-        // Start refreshing
         viewModel.fetchData(isRefresh = true)
-        
-        // StandardTestDispatcher requires advanceTimeBy or yield to start the coroutine
         advanceTimeBy(100)
         
         assertTrue(viewModel.uiState.value.isRefreshing)
