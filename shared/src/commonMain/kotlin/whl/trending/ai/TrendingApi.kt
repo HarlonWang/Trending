@@ -25,15 +25,14 @@ class TrendingApi {
 
     private val baseHost = "https://api.trendingai.cn"
 
-    suspend fun fetchTrending(period: String): TrendingResponse {
+    suspend fun fetchTrending(period: String, language: String): TrendingResponse {
         val endpoint = when (period.lowercase()) {
-            "daily" -> "daily"
-            "weekly" -> "weekly"
-            "monthly" -> "monthly"
+            "daily", "weekly", "monthly" -> period.lowercase()
             else -> "daily"
         }
+        val lang = language.lowercase()
 
-        val url = "$baseHost/trending/$endpoint/all.json"
+        val url = "$baseHost/trending/$endpoint/$lang.json"
         return try {
             val response = client.get(url)
             response.body<TrendingResponse>()
