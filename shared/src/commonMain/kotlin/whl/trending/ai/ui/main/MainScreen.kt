@@ -4,6 +4,8 @@ import whl.trending.ai.data.model.TrendingRepo
 import whl.trending.ai.data.model.TrendingAiSummary
 import whl.trending.ai.core.platform.openUrl
 import whl.trending.ai.core.Constants
+import whl.trending.ai.data.local.globalSettingsManager
+import whl.trending.ai.data.local.AppLanguage
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -306,9 +308,7 @@ private fun RepoItem(index: Int, repo: TrendingRepo, since: String) {
             )
 
             repo.aiSummary?.let { summary ->
-                if (summary.content.isNotEmpty()) {
-                    AiSummaryBox(summary)
-                }
+                AiSummaryBox(summary)
             }
 
             RepoMetadata(repo = repo, since = since)
@@ -318,6 +318,19 @@ private fun RepoItem(index: Int, repo: TrendingRepo, since: String) {
 
 @Composable
 private fun AiSummaryBox(aiSummary: TrendingAiSummary) {
+    val appLanguage by globalSettingsManager.appLanguage.collectAsState(AppLanguage.FOLLOW_SYSTEM)
+    
+    val contentToShow = when (appLanguage) {
+        AppLanguage.CHINESE -> aiSummary.zh ?: aiSummary.en
+        AppLanguage.ENGLISH -> aiSummary.en ?: aiSummary.zh
+        AppLanguage.FOLLOW_SYSTEM -> {
+            // Simplified system detection: if it's zh or en
+            aiSummary.zh ?: aiSummary.en
+        }
+    } ?: return
+
+    if (contentToShow.isEmpty()) return
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -341,7 +354,7 @@ private fun AiSummaryBox(aiSummary: TrendingAiSummary) {
             modifier = Modifier.size(16.dp).padding(top = 2.dp)
         )
         Text(
-            text = aiSummary.content,
+            text = contentToShow,
             fontSize = 14.sp,
             lineHeight = 20.sp,
             color = MaterialTheme.colorScheme.onSecondaryContainer

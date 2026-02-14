@@ -45,6 +45,7 @@ data class TrendingContributor(
  */
 @Serializable
 data class TrendingAiSummary(
-    val content: String = "",
+    val zh: String? = null,
+    val en: String? = null,
     val source: String = ""
 )
