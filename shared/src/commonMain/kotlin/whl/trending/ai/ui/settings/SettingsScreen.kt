@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,9 +51,7 @@ import trending.shared.generated.resources.about_us_desc
 import trending.shared.generated.resources.app_settings
 import trending.shared.generated.resources.back
 import trending.shared.generated.resources.check_updates
-import trending.shared.generated.resources.current_datasource
 import trending.shared.generated.resources.dark_mode
-import trending.shared.generated.resources.datasource_settings
 import trending.shared.generated.resources.language_settings
 import trending.shared.generated.resources.language_option_chinese
 import trending.shared.generated.resources.language_option_english
@@ -189,14 +186,6 @@ fun SettingsScreen(onBack: () -> Unit) {
                         leadingContent = { Icon(Icons.Default.Language, null) }
                     )
                 }
-            }
-            item {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.datasource_settings)) },
-                    supportingContent = { Text(stringResource(Res.string.current_datasource)) },
-                    leadingContent = { Icon(Icons.Default.Storage, null) },
-                    modifier = Modifier.clickable { /* TODO */ }
-                )
             }
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
