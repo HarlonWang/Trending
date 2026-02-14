@@ -7,6 +7,7 @@ import whl.trending.ai.core.platform.isIosPlatform
 import whl.trending.ai.core.platform.openAppSettings
 import whl.trending.ai.core.platform.getAppVersion
 import whl.trending.ai.core.platform.openUrl
+import whl.trending.ai.core.Constants
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -209,7 +210,9 @@ fun SettingsScreen(onBack: () -> Unit) {
                     headlineContent = { Text(stringResource(Res.string.about_us)) },
                     supportingContent = { Text(stringResource(Res.string.about_us_desc)) },
                     leadingContent = { Icon(Icons.Default.Info, null) },
-                    modifier = Modifier.clickable { /* TODO */ }
+                    modifier = Modifier.clickable {
+                        openUrl(Constants.GITHUB_REPO_URL)
+                    }
                 )
             }
         }
