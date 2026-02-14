@@ -26,4 +26,8 @@
     <string name="stars_since">%1$d stars %2$s</string>
     <string name="no_data">No data available</string>
     <string name="back">Back</string>
+    <string name="filter_options">Filter Options</string>
+    <string name="filter_period">Period</string>
+    <string name="filter_language">Language</string>
+    <string name="filter_done">Done</string>
 </resources>

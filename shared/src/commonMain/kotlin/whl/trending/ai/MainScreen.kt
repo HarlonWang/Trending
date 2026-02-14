@@ -1,33 +1,41 @@
 package whl.trending.ai
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,6 +43,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +69,10 @@ import trending.shared.generated.resources.GitHub_Invertocat_White
 import trending.shared.generated.resources.Res
 import trending.shared.generated.resources.app_name
 import trending.shared.generated.resources.deepseek_color
+import trending.shared.generated.resources.filter_done
+import trending.shared.generated.resources.filter_language
+import trending.shared.generated.resources.filter_options
+import trending.shared.generated.resources.filter_period
 import trending.shared.generated.resources.gemini_color
 import trending.shared.generated.resources.icon_flame
 import trending.shared.generated.resources.last_updated
@@ -92,6 +105,8 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
 
     var selectedPeriod by remember { mutableStateOf(periods[0]) }
     var selectedLanguage by remember { mutableStateOf(languages[0]) }
+    var showFilterSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
 
     val coroutineScope = rememberCoroutineScope()
     val api = remember { TrendingApi() }
@@ -147,59 +162,36 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            // Period Filter
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(periods) { period ->
-                    val label = when (period) {
-                        "daily" -> stringResource(Res.string.tab_daily)
-                        "weekly" -> stringResource(Res.string.tab_weekly)
-                        "monthly" -> stringResource(Res.string.tab_monthly)
-                        else -> period
-                    }
-                    FilterChip(
-                        selected = selectedPeriod == period,
-                        onClick = { selectedPeriod = period },
-                        label = { Text(label) },
-                        leadingIcon = if (selectedPeriod == period) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Default.Done,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                )
-                            }
-                        } else null
-                    )
-                }
+            // Compact Filter Trigger
+            val periodLabel = when (selectedPeriod) {
+                "daily" -> stringResource(Res.string.tab_daily)
+                "weekly" -> stringResource(Res.string.tab_weekly)
+                "monthly" -> stringResource(Res.string.tab_monthly)
+                else -> selectedPeriod
             }
-
-            // Language Filter
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(languages) { language ->
-                    FilterChip(
-                        selected = selectedLanguage == language,
-                        onClick = { selectedLanguage = language },
-                        label = { Text(language.replaceFirstChar { it.uppercase() }) },
-                        leadingIcon = if (selectedLanguage == language) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Default.Done,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                )
-                            }
-                        } else null
-                    )
-                }
-            }
+            
+            ListItem(
+                headlineContent = { 
+                    Text(
+                        text = "$periodLabel · ${selectedLanguage.replaceFirstChar { it.uppercase() }}",
+                        style = MaterialTheme.typography.labelLarge
+                    ) 
+                },
+                leadingContent = { 
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    ) 
+                },
+                trailingContent = { 
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null
+                    ) 
+                },
+                modifier = Modifier.clickable { showFilterSheet = true }
+            )
 
             HorizontalDivider()
 
@@ -370,6 +362,92 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    if (showFilterSheet) {
+        var tempPeriod by remember { mutableStateOf(selectedPeriod) }
+        var tempLanguage by remember { mutableStateOf(selectedLanguage) }
+
+        ModalBottomSheet(
+            onDismissRequest = { showFilterSheet = false },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.filter_options),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Text(
+                    text = stringResource(Res.string.filter_period),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    periods.forEachIndexed { index, period ->
+                        val label = when (period) {
+                            "daily" -> stringResource(Res.string.tab_daily)
+                            "weekly" -> stringResource(Res.string.tab_weekly)
+                            "monthly" -> stringResource(Res.string.tab_monthly)
+                            else -> period
+                        }
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(index = index, count = periods.size),
+                            onClick = { tempPeriod = period },
+                            selected = tempPeriod == period
+                        ) {
+                            Text(label)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = stringResource(Res.string.filter_language),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    languages.forEach { language ->
+                        FilterChip(
+                            selected = tempLanguage == language,
+                            onClick = { tempLanguage = language },
+                            label = { Text(language.replaceFirstChar { it.uppercase() }) },
+                            leadingIcon = null
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = { 
+                        selectedPeriod = tempPeriod
+                        selectedLanguage = tempLanguage
+                        showFilterSheet = false 
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(Res.string.filter_done))
                 }
             }
         }
