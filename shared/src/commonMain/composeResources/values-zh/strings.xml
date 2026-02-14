@@ -28,8 +28,8 @@
     <string name="retry">重试</string>
     <string name="error_fetch">获取数据失败: %1$s</string>
     <string name="back">返回</string>
-    <string name="filter_options">筛选选项</string>
-    <string name="filter_period">时间跨度</string>
+    <string name="filter_options">筛选</string>
+    <string name="filter_period">时间</string>
     <string name="filter_language">开发语言</string>
     <string name="filter_done">完成</string>
     <string name="filter_reset">重置</string>
