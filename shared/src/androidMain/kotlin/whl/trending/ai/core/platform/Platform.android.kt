@@ -31,21 +31,34 @@ actual fun openAppSettings() {
     context.startActivity(intent)
 }
 
-actual fun openUrl(url: String) {
+actual fun openUrl(url: String, targetPackage: String?) {
     val context = AndroidContextHolder.get() ?: return
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     
-    // Attempt to open with GitHub App first
-    intent.setPackage("com.github.android")
+    if (targetPackage != null) {
+        intent.setPackage(targetPackage)
+    }
     
     try {
         context.startActivity(intent)
     } catch (e: Exception) {
-        // Fallback to browser if GitHub app is not installed
-        intent.setPackage(null)
-        context.startActivity(intent)
+        // Fallback to system default (browser) if specified app is not installed or fails
+        if (targetPackage != null) {
+            intent.setPackage(null)
+            context.startActivity(intent)
+        }
+    }
+}
+
+actual fun getAppVersion(): String {
+    val context = AndroidContextHolder.get() ?: return "1.0.0"
+    return try {
+        val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        packageInfo.versionName ?: "1.0.0"
+    } catch (e: Exception) {
+        "1.0.0"
     }
 }
 

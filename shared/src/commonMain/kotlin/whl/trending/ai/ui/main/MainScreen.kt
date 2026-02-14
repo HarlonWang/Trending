@@ -3,6 +3,7 @@ package whl.trending.ai.ui.main
 import whl.trending.ai.data.model.TrendingRepo
 import whl.trending.ai.data.model.TrendingAiSummary
 import whl.trending.ai.core.platform.openUrl
+import whl.trending.ai.core.Constants
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -276,7 +277,7 @@ private fun RepoList(
 private fun RepoItem(index: Int, repo: TrendingRepo, since: String) {
     Row(
         modifier = Modifier
-            .clickable { openUrl(repo.url) }
+            .clickable { openUrl(repo.url, Constants.GITHUB_APP_PACKAGE) }
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {

@@ -4,6 +4,7 @@ import platform.UIKit.UIDevice
 import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.Foundation.NSURL
+import platform.Foundation.NSBundle
 
 class IOSPlatform: Platform {
     override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
@@ -23,7 +24,7 @@ actual fun openAppSettings() {
     }
 }
 
-actual fun openUrl(url: String) {
+actual fun openUrl(url: String, targetPackage: String?) {
     val nsUrl = NSURL.URLWithString(url)
     if (nsUrl != null) {
         UIApplication.sharedApplication.openURL(
@@ -32,6 +33,11 @@ actual fun openUrl(url: String) {
             completionHandler = { _ -> }
         )
     }
+}
+
+actual fun getAppVersion(): String {
+    val info = NSBundle.mainBundle.infoDictionary
+    return info?.get("CFBundleShortVersionString") as? String ?: "1.0.0"
 }
 
 actual fun isIosPlatform(): Boolean = true

@@ -8,6 +8,8 @@ expect fun getPlatform(): Platform
 
 expect fun openAppSettings()
 
-expect fun openUrl(url: String)
+expect fun openUrl(url: String, targetPackage: String? = null)
+
+expect fun getAppVersion(): String
 
 expect fun isIosPlatform(): Boolean

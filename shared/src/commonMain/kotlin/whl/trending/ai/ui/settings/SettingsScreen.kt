@@ -5,6 +5,8 @@ import whl.trending.ai.data.local.ThemeMode
 import whl.trending.ai.data.local.globalSettingsManager
 import whl.trending.ai.core.platform.isIosPlatform
 import whl.trending.ai.core.platform.openAppSettings
+import whl.trending.ai.core.platform.getAppVersion
+import whl.trending.ai.core.platform.openUrl
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -70,6 +72,7 @@ fun SettingsScreen(onBack: () -> Unit) {
     val isIos = isIosPlatform()
     val themeMode by globalSettingsManager.themeMode.collectAsState(ThemeMode.FOLLOW_SYSTEM)
     val appLanguage by globalSettingsManager.appLanguage.collectAsState(AppLanguage.FOLLOW_SYSTEM)
+    val appVersion = remember { getAppVersion() }
 
     Scaffold(
         topBar = {
@@ -194,9 +197,11 @@ fun SettingsScreen(onBack: () -> Unit) {
             item {
                 ListItem(
                     headlineContent = { Text(stringResource(Res.string.check_updates)) },
-                    trailingContent = { Text("v1.0.0", color = MaterialTheme.colorScheme.outline) },
+                    trailingContent = { Text(appVersion, color = MaterialTheme.colorScheme.outline) },
                     leadingContent = { Icon(Icons.Default.Refresh, null) },
-                    modifier = Modifier.clickable { /* TODO */ }
+                    modifier = Modifier.clickable {
+                        openUrl("https://github.com/HarlonWang/Trending/releases")
+                    }
                 )
             }
             item {
