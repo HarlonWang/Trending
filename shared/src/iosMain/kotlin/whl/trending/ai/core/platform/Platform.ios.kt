@@ -23,4 +23,15 @@ actual fun openAppSettings() {
     }
 }
 
+actual fun openUrl(url: String) {
+    val nsUrl = NSURL.URLWithString(url)
+    if (nsUrl != null) {
+        UIApplication.sharedApplication.openURL(
+            nsUrl,
+            options = emptyMap<Any?, Any?>(),
+            completionHandler = { _ -> }
+        )
+    }
+}
+
 actual fun isIosPlatform(): Boolean = true

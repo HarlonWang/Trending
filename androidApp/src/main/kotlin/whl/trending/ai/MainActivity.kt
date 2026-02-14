@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        whl.trending.ai.core.platform.AndroidContextHolder.initialize(this)
 
         lifecycleScope.launch {
             globalSettingsManager.appLanguage
