@@ -14,7 +14,7 @@ object DateTimeUtils {
         char('-')
         monthNumber()
         char('-')
-        dayOfMonth()
+        day()
         char(' ')
         hour()
         char(':')
