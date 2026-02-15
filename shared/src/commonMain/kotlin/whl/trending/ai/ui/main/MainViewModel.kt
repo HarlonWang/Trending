@@ -2,6 +2,7 @@ package whl.trending.ai.ui.main
 
 import whl.trending.ai.data.model.TrendingRepo
 import whl.trending.ai.data.repository.TrendingRepository
+import whl.trending.ai.core.DateTimeUtils
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -50,7 +51,7 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
                     it.copy(
                         repos = response.data,
                         since = response.since,
-                        capturedAt = response.capturedAt,
+                        capturedAt = DateTimeUtils.formatToLocalTime(response.capturedAt),
                         isLoading = false,
                         isRefreshing = false,
                         error = null

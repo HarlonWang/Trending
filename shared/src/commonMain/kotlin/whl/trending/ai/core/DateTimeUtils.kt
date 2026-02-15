@@ -1,0 +1,48 @@
+package whl.trending.ai.core
+
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+
+object DateTimeUtils {
+    // 定义 yyyy-MM-dd HH:mm:ss 格式
+    private val dateTimeFormat = LocalDateTime.Format {
+        year()
+        char('-')
+        monthNumber()
+        char('-')
+        dayOfMonth()
+        char(' ')
+        hour()
+        char(':')
+        minute()
+        char(':')
+        second()
+    }
+
+    /**
+     * 将 API 返回的 UTC 时间字符串转换为本地时区对应的日期时间字符串。
+     * API 格式: "2026-02-15 00:17:20"
+     */
+    fun formatToLocalTime(utcString: String): String {
+        if (utcString.isEmpty()) return ""
+        return try {
+            // 1. 解析为无时区的 LocalDateTime
+            val utcLocalDateTime = LocalDateTime.parse(utcString, dateTimeFormat)
+            
+            // 2. 转换为 UTC 时区的 Instant
+            val instant = utcLocalDateTime.toInstant(TimeZone.UTC)
+            
+            // 3. 转换为本地时区的 LocalDateTime
+            val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+            
+            // 4. 格式化输出
+            localDateTime.format(dateTimeFormat)
+        } catch (e: Exception) {
+            utcString
+        }
+    }
+}
