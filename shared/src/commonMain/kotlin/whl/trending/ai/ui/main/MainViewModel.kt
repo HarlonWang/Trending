@@ -3,6 +3,7 @@ package whl.trending.ai.ui.main
 import whl.trending.ai.data.model.TrendingRepo
 import whl.trending.ai.data.repository.TrendingRepository
 import whl.trending.ai.core.DateTimeUtils
+import whl.trending.ai.data.local.SettingsManager
 import whl.trending.ai.data.local.globalSettingsManager
 import whl.trending.ai.core.platform.getSystemLanguage
 
@@ -32,7 +33,10 @@ data class MainUiState(
     val error: String? = null
 )
 
-class MainViewModel(private val repository: TrendingRepository = TrendingRepository()) : ViewModel() {
+class MainViewModel(
+    private val repository: TrendingRepository = TrendingRepository(),
+    private val settingsManager: SettingsManager = globalSettingsManager
+) : ViewModel() {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
@@ -43,7 +47,7 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
         
         viewModelScope.launch {
             // drop(1) 丢弃首次初始化的当前值，只监听真正发生的设置修改，避免初始化时重复调用 fetchData
-            globalSettingsManager.appLanguage.drop(1).collect {
+            settingsManager.appLanguage.drop(1).collect {
                 fetchData(isRefresh = true)
             }
         }
@@ -60,7 +64,7 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
             }
 
             try {
-                val currentAppLanguage = globalSettingsManager.appLanguage.first()
+                val currentAppLanguage = settingsManager.appLanguage.first()
                 val summaryLang = currentAppLanguage.isoCode ?: getSystemLanguage()
                 
                 val providerParam = _uiState.value.selectedProviders.joinToString(",")
