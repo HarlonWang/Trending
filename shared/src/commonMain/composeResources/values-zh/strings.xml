@@ -37,8 +37,8 @@
     <string name="history_trending">历史榜单</string>
     <string name="history_date">日期</string>
     <string name="history_batch">批次</string>
-    <string name="batch_am">上午 (AM)</string>
-    <string name="batch_pm">下午 (PM)</string>
+    <string name="batch_am">上午</string>
+    <string name="batch_pm">下午</string>
     <string name="click_to_select_date">点击选择日期</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
