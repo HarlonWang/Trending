@@ -208,11 +208,12 @@ private fun TrendingTopBar(
                 }
                 
                 val langLabel = selectedLanguage.replaceFirstChar { it.uppercase() }
-                val subTitle = if (!selectedDate.isNullOrEmpty()) {
-                    val batchLabel = if (selectedBatch == "am") stringResource(Res.string.batch_am) else stringResource(Res.string.batch_pm)
-                    "$selectedDate ($batchLabel) · $langLabel"
-                } else {
-                    "$periodLabel · $langLabel"
+                val subTitle = buildString {
+                    append("$periodLabel · $langLabel")
+                    if (!selectedDate.isNullOrEmpty()) {
+                        val batchLabel = if (selectedBatch == "am") stringResource(Res.string.batch_am) else stringResource(Res.string.batch_pm)
+                        append(" · $selectedDate ($batchLabel)")
+                    }
                 }
 
                 Text(
