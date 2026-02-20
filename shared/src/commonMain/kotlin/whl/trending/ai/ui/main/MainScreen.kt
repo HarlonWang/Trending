@@ -4,8 +4,6 @@ import whl.trending.ai.data.model.TrendingRepo
 import whl.trending.ai.data.model.TrendingAiSummary
 import whl.trending.ai.core.platform.openUrl
 import whl.trending.ai.core.Constants
-import whl.trending.ai.data.local.globalSettingsManager
-import whl.trending.ai.data.local.AppLanguage
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -73,6 +71,7 @@ import trending.shared.generated.resources.Res
 import trending.shared.generated.resources.app_name
 import trending.shared.generated.resources.deepseek_color
 import trending.shared.generated.resources.error_fetch
+import trending.shared.generated.resources.filter_ai_provider
 import trending.shared.generated.resources.filter_done
 import trending.shared.generated.resources.filter_language
 import trending.shared.generated.resources.filter_options
@@ -122,9 +121,10 @@ fun MainScreen(
         FilterBottomSheet(
             selectedPeriod = uiState.selectedPeriod,
             selectedLanguage = uiState.selectedLanguage,
+            selectedProviders = uiState.selectedProviders,
             onDismiss = { showFilterSheet = false },
-            onConfirm = { period, language ->
-                viewModel.updateFilter(period, language)
+            onConfirm = { period, language, providers ->
+                viewModel.updateFilter(period, language, providers)
                 showFilterSheet = false
             }
         )
@@ -306,8 +306,12 @@ private fun RepoItem(index: Int, repo: TrendingRepo, since: String) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            repo.aiSummary?.let { summary ->
-                AiSummaryBox(summary)
+            if (repo.aiSummaries.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    repo.aiSummaries.forEach { summary ->
+                        AiSummaryBox(summary)
+                    }
+                }
             }
 
             RepoMetadata(repo = repo, since = since)
@@ -317,18 +321,7 @@ private fun RepoItem(index: Int, repo: TrendingRepo, since: String) {
 
 @Composable
 private fun AiSummaryBox(aiSummary: TrendingAiSummary) {
-    val appLanguage by globalSettingsManager.appLanguage.collectAsState(AppLanguage.FOLLOW_SYSTEM)
-    
-    val contentToShow = when (appLanguage) {
-        AppLanguage.CHINESE -> aiSummary.zh ?: aiSummary.en
-        AppLanguage.ENGLISH -> aiSummary.en ?: aiSummary.zh
-        AppLanguage.FOLLOW_SYSTEM -> {
-            // Simplified system detection: if it's zh or en
-            aiSummary.zh ?: aiSummary.en
-        }
-    } ?: return
-
-    if (contentToShow.isEmpty()) return
+    if (aiSummary.content.isEmpty()) return
 
     Row(
         modifier = Modifier
@@ -341,19 +334,20 @@ private fun AiSummaryBox(aiSummary: TrendingAiSummary) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.Top
     ) {
-        val aiIcon = when (aiSummary.source.lowercase()) {
-            "gemini" -> Res.drawable.gemini_color
+        val aiIcon = when (aiSummary.provider.lowercase()) {
+            "chatgpt" -> Res.drawable.gemini_color // Placeholder for ChatGPT icon if not available
             "deepseek" -> Res.drawable.deepseek_color
+            "gemini" -> Res.drawable.gemini_color
             else -> Res.drawable.gemini_color
         }
         Icon(
             painter = painterResource(aiIcon),
-            contentDescription = "AI-ICON",
+            contentDescription = aiSummary.provider,
             tint = Color.Unspecified,
             modifier = Modifier.size(16.dp).padding(top = 2.dp)
         )
         Text(
-            text = contentToShow,
+            text = aiSummary.content,
             fontSize = 14.sp,
             lineHeight = 20.sp,
             color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -395,14 +389,17 @@ private fun RepoMetadata(repo: TrendingRepo, since: String) {
 private fun FilterBottomSheet(
     selectedPeriod: String,
     selectedLanguage: String,
+    selectedProviders: Set<String>,
     onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    onConfirm: (String, String, Set<String>) -> Unit
 ) {
     val periods = listOf("daily", "weekly", "monthly")
     val languages = listOf("all", "javascript", "java", "go", "rust", "typescript", "c++", "c", "swift", "kotlin")
+    val providers = listOf("chatgpt", "deepseek")
     
     var tempPeriod by remember { mutableStateOf(selectedPeriod) }
     var tempLanguage by remember { mutableStateOf(selectedLanguage) }
+    var tempProviders by remember { mutableStateOf(selectedProviders) }
     val sheetState = rememberModalBottomSheetState()
 
     ModalBottomSheet(
@@ -447,6 +444,35 @@ private fun FilterBottomSheet(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
+                text = stringResource(Res.string.filter_ai_provider),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                providers.forEach { provider ->
+                    FilterChip(
+                        selected = tempProviders.contains(provider),
+                        onClick = {
+                            tempProviders = if (tempProviders.contains(provider)) {
+                                if (tempProviders.size > 1) tempProviders - provider else tempProviders
+                            } else {
+                                tempProviders + provider
+                            }
+                        },
+                        label = { Text(provider.replaceFirstChar { it.uppercase() }) },
+                        leadingIcon = null
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
                 text = stringResource(Res.string.filter_language),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
@@ -475,7 +501,7 @@ private fun FilterBottomSheet(
             ) {
                 androidx.compose.material3.OutlinedButton(
                     onClick = {
-                        onConfirm("daily", "all")
+                        onConfirm("daily", "all", setOf("chatgpt"))
                     },
                     modifier = Modifier.weight(1f)
                 ) {
@@ -483,7 +509,7 @@ private fun FilterBottomSheet(
                 }
 
                 Button(
-                    onClick = { onConfirm(tempPeriod, tempLanguage) },
+                    onClick = { onConfirm(tempPeriod, tempLanguage, tempProviders) },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(stringResource(Res.string.filter_done))

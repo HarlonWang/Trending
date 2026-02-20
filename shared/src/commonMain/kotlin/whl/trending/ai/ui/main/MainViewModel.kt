@@ -22,6 +22,7 @@ data class MainUiState(
     val isRefreshing: Boolean = false,
     val selectedPeriod: String = "daily",
     val selectedLanguage: String = "all",
+    val selectedProviders: Set<String> = setOf("chatgpt"),
     val error: String? = null
 )
 
@@ -46,12 +47,17 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
             }
 
             try {
-                val response = repository.getTrending(_uiState.value.selectedPeriod, _uiState.value.selectedLanguage)
+                val providerParam = _uiState.value.selectedProviders.joinToString(",")
+                val response = repository.getTrending(
+                    _uiState.value.selectedPeriod, 
+                    _uiState.value.selectedLanguage,
+                    providerParam
+                )
                 _uiState.update { 
                     it.copy(
                         repos = response.data,
-                        since = response.since,
-                        capturedAt = DateTimeUtils.formatToLocalTime(response.capturedAt),
+                        since = response.metadata.since,
+                        capturedAt = DateTimeUtils.formatToLocalTime(response.metadata.capturedAt),
                         isLoading = false,
                         isRefreshing = false,
                         error = null
@@ -70,13 +76,16 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
         }
     }
 
-    fun updateFilter(period: String, language: String) {
-        if (_uiState.value.selectedPeriod == period && _uiState.value.selectedLanguage == language) return
+    fun updateFilter(period: String, language: String, providers: Set<String>) {
+        if (_uiState.value.selectedPeriod == period && 
+            _uiState.value.selectedLanguage == language &&
+            _uiState.value.selectedProviders == providers) return
         
         _uiState.update { 
             it.copy(
                 selectedPeriod = period,
-                selectedLanguage = language
+                selectedLanguage = language,
+                selectedProviders = providers
             )
         }
         fetchData()

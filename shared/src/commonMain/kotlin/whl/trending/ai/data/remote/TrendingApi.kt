@@ -7,6 +7,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
@@ -27,15 +28,20 @@ open class TrendingApi {
 
     private val baseHost = "https://api.trendingai.cn"
 
-    open suspend fun fetchTrending(period: String, language: String): TrendingResponse {
-        val endpoint = when (period.lowercase()) {
-            "daily", "weekly", "monthly" -> period.lowercase()
-            else -> "daily"
+    open suspend fun fetchTrending(
+        period: String,
+        language: String,
+        providers: String? = null,
+        summaryLang: String = "zh"
+    ): TrendingResponse {
+        val response = client.get("$baseHost/api/trending") {
+            parameter("since", period.lowercase())
+            parameter("lang", language.lowercase())
+            parameter("summary_lang", summaryLang)
+            if (!providers.isNullOrBlank()) {
+                parameter("provider", providers)
+            }
         }
-        val lang = language.lowercase()
-
-        val url = "$baseHost/trending/$endpoint/$lang.json"
-        val response = client.get(url)
         return response.body<TrendingResponse>()
     }
 }

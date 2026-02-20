@@ -16,7 +16,7 @@ data class TrendingRepo(
     val forks: Int = 0,
     val currentPeriodStars: Int = 0,
     val builtBy: List<TrendingContributor> = emptyList(),
-    val aiSummary: TrendingAiSummary? = null
+    val aiSummaries: List<TrendingAiSummary> = emptyList()
 )
 
 /**
@@ -24,11 +24,26 @@ data class TrendingRepo(
  */
 @Serializable
 data class TrendingResponse(
+    val success: Boolean = false,
     val count: Int = 0,
-    val since: String = "",
-    @SerialName("captured_at")
-    val capturedAt: String = "",
+    val metadata: TrendingMetadata = TrendingMetadata(),
     val data: List<TrendingRepo> = emptyList()
+)
+
+/**
+ * API 返回的元数据信息。
+ */
+@Serializable
+data class TrendingMetadata(
+    val since: String = "",
+    val lang: String = "",
+    @SerialName("summary_lang")
+    val summaryLang: String = "",
+    val providers: List<String> = emptyList(),
+    val date: String = "",
+    val batch: String = "",
+    @SerialName("captured_at")
+    val capturedAt: String = ""
 )
 
 /**
@@ -45,7 +60,6 @@ data class TrendingContributor(
  */
 @Serializable
 data class TrendingAiSummary(
-    val zh: String? = null,
-    val en: String? = null,
-    val source: String = ""
+    val provider: String = "",
+    val content: String = ""
 )

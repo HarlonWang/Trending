@@ -31,6 +31,7 @@
     <string name="filter_options">筛选</string>
     <string name="filter_period">时间</string>
     <string name="filter_language">开发语言</string>
+    <string name="filter_ai_provider">AI 服务商</string>
     <string name="filter_done">完成</string>
     <string name="filter_reset">重置</string>
 </resources>

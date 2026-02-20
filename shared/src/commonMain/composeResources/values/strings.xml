@@ -31,6 +31,7 @@
     <string name="filter_options">Filter</string>
     <string name="filter_period">Time</string>
     <string name="filter_language">Language</string>
+    <string name="filter_ai_provider">AI Provider</string>
     <string name="filter_done">Done</string>
     <string name="filter_reset">Reset</string>
 </resources>
