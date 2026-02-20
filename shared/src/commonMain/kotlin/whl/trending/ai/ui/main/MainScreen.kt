@@ -125,6 +125,8 @@ fun MainScreen(
             TrendingTopBar(
                 selectedPeriod = uiState.selectedPeriod,
                 selectedLanguage = uiState.selectedLanguage,
+                selectedDate = uiState.selectedDate,
+                selectedBatch = uiState.selectedBatch,
                 scrollBehavior = scrollBehavior,
                 onTitleClick = { showFilterSheet = true },
                 onHistoryClick = { showHistorySheet = true },
@@ -170,6 +172,8 @@ fun MainScreen(
 private fun TrendingTopBar(
     selectedPeriod: String,
     selectedLanguage: String,
+    selectedDate: String?,
+    selectedBatch: String?,
     scrollBehavior: TopAppBarScrollBehavior,
     onTitleClick: () -> Unit,
     onHistoryClick: () -> Unit,
@@ -202,8 +206,17 @@ private fun TrendingTopBar(
                         modifier = Modifier.size(16.dp).padding(start = 4.dp)
                     )
                 }
+                
+                val langLabel = selectedLanguage.replaceFirstChar { it.uppercase() }
+                val subTitle = if (!selectedDate.isNullOrEmpty()) {
+                    val batchLabel = if (selectedBatch == "am") stringResource(Res.string.batch_am) else stringResource(Res.string.batch_pm)
+                    "$selectedDate ($batchLabel) · $langLabel"
+                } else {
+                    "$periodLabel · $langLabel"
+                }
+
                 Text(
-                    text = "$periodLabel · ${selectedLanguage.replaceFirstChar { it.uppercase() }}",
+                    text = subTitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
