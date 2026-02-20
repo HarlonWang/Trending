@@ -69,7 +69,6 @@ import trending.shared.generated.resources.GitHub_Invertocat_Black
 import trending.shared.generated.resources.GitHub_Invertocat_White
 import trending.shared.generated.resources.Res
 import trending.shared.generated.resources.app_name
-import trending.shared.generated.resources.deepseek_color
 import trending.shared.generated.resources.error_fetch
 import trending.shared.generated.resources.filter_ai_provider
 import trending.shared.generated.resources.filter_done
@@ -77,8 +76,13 @@ import trending.shared.generated.resources.filter_language
 import trending.shared.generated.resources.filter_options
 import trending.shared.generated.resources.filter_period
 import trending.shared.generated.resources.filter_reset
-import trending.shared.generated.resources.gemini_color
+import trending.shared.generated.resources.icon_deepseek_dark
+import trending.shared.generated.resources.icon_deepseek_light
 import trending.shared.generated.resources.icon_flame
+import trending.shared.generated.resources.icon_gemini_dark
+import trending.shared.generated.resources.icon_gemini_light
+import trending.shared.generated.resources.icon_openai_dark
+import trending.shared.generated.resources.icon_openai_light
 import trending.shared.generated.resources.last_updated
 import trending.shared.generated.resources.no_data
 import trending.shared.generated.resources.retry
@@ -322,8 +326,9 @@ private fun RepoItem(index: Int, repo: TrendingRepo, since: String) {
 @Composable
 private fun AiSummaryBox(aiSummary: TrendingAiSummary) {
     if (aiSummary.content.isEmpty()) return
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
@@ -331,26 +336,28 @@ private fun AiSummaryBox(aiSummary: TrendingAiSummary) {
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Top
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        val aiIcon = when (aiSummary.provider.lowercase()) {
-            "chatgpt" -> Res.drawable.gemini_color // Placeholder for ChatGPT icon if not available
-            "deepseek" -> Res.drawable.deepseek_color
-            "gemini" -> Res.drawable.gemini_color
-            else -> Res.drawable.gemini_color
-        }
-        Icon(
-            painter = painterResource(aiIcon),
-            contentDescription = aiSummary.provider,
-            tint = Color.Unspecified,
-            modifier = Modifier.size(16.dp).padding(top = 2.dp)
-        )
         Text(
             text = aiSummary.content,
             fontSize = 14.sp,
             lineHeight = 20.sp,
             color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+        
+        val aiIcon = when (aiSummary.provider.lowercase()) {
+            "chatgpt" -> if (isDarkTheme) Res.drawable.icon_openai_dark else Res.drawable.icon_openai_light
+            "deepseek" -> if (isDarkTheme) Res.drawable.icon_deepseek_dark else Res.drawable.icon_deepseek_light
+            "gemini" -> if (isDarkTheme) Res.drawable.icon_gemini_dark else Res.drawable.icon_gemini_light
+            else -> if (isDarkTheme) Res.drawable.icon_gemini_dark else Res.drawable.icon_gemini_light
+        }
+        Icon(
+            painter = painterResource(aiIcon),
+            contentDescription = aiSummary.provider,
+            tint = Color.Unspecified,
+            modifier = Modifier
+                .size(14.dp)
+                .align(Alignment.End)
         )
     }
 }
