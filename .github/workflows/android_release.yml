@@ -48,6 +48,72 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
+      - name: Generate Release Notes
+        run: |
+          # 获取 commit 记录
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "${{ github.ref_name }}" | head -n 1)
+          if [ -n "$PREVIOUS_TAG" ]; then
+            COMMIT_LOGS=$(git log "$PREVIOUS_TAG"..HEAD --no-merges --oneline)
+          else
+            COMMIT_LOGS=$(git log --no-merges --oneline -n 20)
+          fi
+          
+          # 写入环境变量供 Python 读取
+          echo "COMMIT_LOGS<<EOF" >> $GITHUB_ENV
+          echo "$COMMIT_LOGS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          
+          python3 - <<'EOF'
+          import os
+          import json
+          import urllib.request
+          
+          commits = os.environ.get("COMMIT_LOGS", "")
+          api_key = os.environ.get("OPENAI_API_KEY", "")
+          api_url = "https://api.openai.com/v1/chat/completions"
+          
+          fallback_text = "### 变更记录 (Changelog)\n\n" + commits
+          
+          if not commits.strip():
+              with open("release_summary.md", "w") as f:
+                  f.write("### 更新内容 (Release Notes)\n\n* No specific changes.\n\n")
+              exit(0)
+              
+          if not api_key:
+              print("⚠️ OPENAI_API_KEY not found. Using fallback.")
+              with open("release_summary.md", "w") as f:
+                  f.write(fallback_text + "\n\n")
+              exit(0)
+              
+          prompt = f"请根据以下 git commit 记录，生成一份面向用户的 Release Notes。\n要求：\n1. 忽略琐碎的构建或内部调整，总结出核心的新特性、优化和修复。\n2. 同时提供清晰的中文和英文版本（英文在上，中文在下）。\n3. 使用 Markdown 列表格式，不要输出过于啰碎的技术术语。\n\nCommits:\n{commits}"
+          
+          data = {
+              "model": "gpt-5.1",
+              "messages": [{"role": "user", "content": prompt}],
+              "temperature": 0.7
+          }
+          
+          req = urllib.request.Request(api_url, data=json.dumps(data).encode("utf-8"), headers={
+              "Content-Type": "application/json",
+              "Authorization": f"Bearer {api_key}"
+          })
+          
+          try:
+              print("Calling ChatGPT API (model: gpt-5.1)...")
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  res_data = json.loads(response.read().decode("utf-8"))
+                  summary = res_data["choices"][0]["message"]["content"]
+                  with open("release_summary.md", "w") as f:
+                      f.write("### 更新内容 (Release Notes)\n\n" + summary + "\n\n")
+                  print("✅ ChatGPT generated release notes successfully.")
+          except Exception as e:
+              print(f"⚠️ ChatGPT API call failed: {e}")
+              with open("release_summary.md", "w") as f:
+                  f.write(fallback_text + "\n\n")
+          EOF
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
       - name: Prepare APK Diff
         id: diffuse
         run: |
@@ -61,7 +127,7 @@ jobs:
           
           NEW_APK=$(find androidApp/build/outputs/apk/release -name "*.apk" | head -n 1)
           
-          echo "### Apk Diff" > release_summary.md
+          echo "### Apk Diff" >> release_summary.md
           
           if [ -n "$PREVIOUS_TAG" ]; then
             # 3. 下载旧版本 APK
