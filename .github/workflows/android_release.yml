@@ -58,23 +58,27 @@ jobs:
             COMMIT_LOGS=$(git log --no-merges --oneline -n 20)
           fi
           
-          # 写入环境变量供 Python 读取
-          echo "COMMIT_LOGS<<EOF" >> $GITHUB_ENV
-          echo "$COMMIT_LOGS" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # 修复变量传递问题：直接将变量内容存入临时文件，供 Python 读取
+          echo "$COMMIT_LOGS" > commit_logs.txt
           
           python3 - <<'EOF'
           import os
           import json
           import urllib.request
           
-          commits = os.environ.get("COMMIT_LOGS", "")
+          # 从临时文件读取 commit 记录
+          if os.path.exists("commit_logs.txt"):
+              with open("commit_logs.txt", "r") as f:
+                  commits = f.read().strip()
+          else:
+              commits = ""
+              
           api_key = os.environ.get("OPENAI_API_KEY", "")
           api_url = "https://api.openai.com/v1/chat/completions"
           
           fallback_text = "### 变更记录 (Changelog)\n\n" + commits
           
-          if not commits.strip():
+          if not commits:
               with open("release_summary.md", "w") as f:
                   f.write("### 更新内容 (Release Notes)\n\n* No specific changes.\n\n")
               exit(0)
