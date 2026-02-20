@@ -13,3 +13,5 @@ expect fun openUrl(url: String, targetPackage: String? = null)
 expect fun getAppVersion(): String
 
 expect fun isIosPlatform(): Boolean
+
+expect fun getSystemLanguage(): String

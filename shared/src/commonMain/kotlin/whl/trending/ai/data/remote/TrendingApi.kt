@@ -32,7 +32,7 @@ open class TrendingApi {
         period: String,
         language: String,
         providers: String? = null,
-        summaryLang: String = "zh"
+        summaryLang: String
     ): TrendingResponse {
         val response = client.get("$baseHost/api/trending") {
             parameter("since", period.lowercase())

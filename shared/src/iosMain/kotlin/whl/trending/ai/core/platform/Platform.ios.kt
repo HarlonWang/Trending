@@ -5,6 +5,8 @@ import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.Foundation.NSURL
 import platform.Foundation.NSBundle
+import platform.Foundation.NSLocale
+import platform.Foundation.preferredLanguages
 
 class IOSPlatform: Platform {
     override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
@@ -41,3 +43,8 @@ actual fun getAppVersion(): String {
 }
 
 actual fun isIosPlatform(): Boolean = true
+
+actual fun getSystemLanguage(): String {
+    val preferredLanguage = NSLocale.preferredLanguages.firstOrNull() as? String ?: "en"
+    return preferredLanguage.split("-").firstOrNull() ?: "en"
+}

@@ -63,3 +63,5 @@ actual fun getAppVersion(): String {
 }
 
 actual fun isIosPlatform(): Boolean = false
+
+actual fun getSystemLanguage(): String = java.util.Locale.getDefault().language

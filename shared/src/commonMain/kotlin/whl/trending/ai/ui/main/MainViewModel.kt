@@ -3,6 +3,8 @@ package whl.trending.ai.ui.main
 import whl.trending.ai.data.model.TrendingRepo
 import whl.trending.ai.data.repository.TrendingRepository
 import whl.trending.ai.core.DateTimeUtils
+import whl.trending.ai.data.local.globalSettingsManager
+import whl.trending.ai.core.platform.getSystemLanguage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +13,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,6 +38,13 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
 
     init {
         fetchData()
+        
+        viewModelScope.launch {
+            // drop(1) 丢弃首次初始化的当前值，只监听真正发生的设置修改，避免初始化时重复调用 fetchData
+            globalSettingsManager.appLanguage.drop(1).collect {
+                fetchData(isRefresh = true)
+            }
+        }
     }
 
     fun fetchData(isRefresh: Boolean = false) {
@@ -47,11 +58,15 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
             }
 
             try {
+                val currentAppLanguage = globalSettingsManager.appLanguage.first()
+                val summaryLang = currentAppLanguage.isoCode ?: getSystemLanguage()
+                
                 val providerParam = _uiState.value.selectedProviders.joinToString(",")
                 val response = repository.getTrending(
                     _uiState.value.selectedPeriod, 
                     _uiState.value.selectedLanguage,
-                    providerParam
+                    providerParam,
+                    summaryLang
                 )
                 _uiState.update { 
                     it.copy(
