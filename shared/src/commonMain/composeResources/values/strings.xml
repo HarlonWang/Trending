@@ -34,4 +34,13 @@
     <string name="filter_ai_provider">AI Provider</string>
     <string name="filter_done">Done</string>
     <string name="filter_reset">Reset</string>
+    <string name="history_trending">History</string>
+    <string name="history_date">Date</string>
+    <string name="history_batch">Batch</string>
+    <string name="batch_am">AM</string>
+    <string name="batch_pm">PM</string>
+    <string name="click_to_select_date">Click to select date</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="select_date">Select Date</string>
 </resources>

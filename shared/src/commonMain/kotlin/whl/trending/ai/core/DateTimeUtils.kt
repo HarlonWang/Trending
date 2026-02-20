@@ -4,8 +4,10 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
+import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 object DateTimeUtils {
     // 定义 yyyy-MM-dd HH:mm:ss 格式
@@ -44,5 +46,15 @@ object DateTimeUtils {
         } catch (e: Exception) {
             utcString
         }
+    }
+
+    /**
+     * 将 DatePicker 返回的毫秒值转换为 YYYY-MM-DD 字符串。
+     */
+    fun formatEpochMillisToDate(millis: Long?): String {
+        if (millis == null) return ""
+        val instant = Instant.fromEpochMilliseconds(millis)
+        val date = instant.toLocalDateTime(TimeZone.UTC).date
+        return "${date.year}-${date.month.number.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
     }
 }

@@ -32,7 +32,9 @@ open class TrendingApi {
         period: String,
         language: String,
         providers: String? = null,
-        summaryLang: String
+        summaryLang: String,
+        date: String? = null,
+        batch: String? = null
     ): TrendingResponse {
         val response = client.get("$baseHost/api/trending") {
             parameter("since", period.lowercase())
@@ -40,6 +42,12 @@ open class TrendingApi {
             parameter("summary_lang", summaryLang)
             if (!providers.isNullOrBlank()) {
                 parameter("provider", providers)
+            }
+            if (!date.isNullOrBlank()) {
+                parameter("date", date)
+            }
+            if (!batch.isNullOrBlank()) {
+                parameter("batch", batch)
             }
         }
         return response.body<TrendingResponse>()

@@ -8,8 +8,10 @@ class TrendingRepository(private val api: TrendingApi = TrendingApi()) {
         period: String, 
         language: String, 
         providers: String? = null,
-        summaryLang: String
+        summaryLang: String,
+        date: String? = null,
+        batch: String? = null
     ): TrendingResponse {
-        return api.fetchTrending(period, language, providers, summaryLang)
+        return api.fetchTrending(period, language, providers, summaryLang, date, batch)
     }
 }

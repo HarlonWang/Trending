@@ -27,6 +27,8 @@ data class MainUiState(
     val selectedPeriod: String = "daily",
     val selectedLanguage: String = "all",
     val selectedProviders: Set<String> = setOf("chatgpt"),
+    val selectedDate: String? = null,
+    val selectedBatch: String? = null,
     val error: String? = null
 )
 
@@ -66,7 +68,9 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
                     _uiState.value.selectedPeriod, 
                     _uiState.value.selectedLanguage,
                     providerParam,
-                    summaryLang
+                    summaryLang,
+                    _uiState.value.selectedDate,
+                    _uiState.value.selectedBatch
                 )
                 _uiState.update { 
                     it.copy(
@@ -101,6 +105,19 @@ class MainViewModel(private val repository: TrendingRepository = TrendingReposit
                 selectedPeriod = period,
                 selectedLanguage = language,
                 selectedProviders = providers
+            )
+        }
+        fetchData()
+    }
+
+    fun updateHistoryFilter(date: String?, batch: String?) {
+        if (_uiState.value.selectedDate == date && 
+            _uiState.value.selectedBatch == batch) return
+        
+        _uiState.update { 
+            it.copy(
+                selectedDate = date,
+                selectedBatch = batch
             )
         }
         fetchData()
