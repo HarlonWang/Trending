@@ -61,8 +61,13 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
-            // 应用签名配置
-            signingConfig = signingConfigs.getByName("release")
+
+            val releaseConfig = signingConfigs.getByName("release")
+            signingConfig = if (releaseConfig.storeFile?.exists() == true) {
+                releaseConfig
+            } else {
+                signingConfigs.getByName("debug")
+            }
             manifestPlaceholders["appName"] = "Trending"
         }
         getByName("debug") {
