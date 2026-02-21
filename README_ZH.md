@@ -43,3 +43,9 @@ Trending AI 是一款使用 Kotlin Multiplatform (KMP) 构建的跨平台应用�
 
 - [项目技术架构文档](docs/ARCHITECTURE.md)
 - [图标制作与适配指南](docs/ICON_GUIDE.md)
+
+---
+
+## 📄 开源协议
+
+本项目采用 MIT 协议开源 - 详情请参阅 [LICENSE](LICENSE) 文件。

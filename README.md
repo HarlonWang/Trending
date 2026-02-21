@@ -45,3 +45,9 @@ Trending AI is a cross-platform application built with Kotlin Multiplatform (KMP
 
 - [Project Architecture](docs/ARCHITECTURE.md)
 - [Icon Creation and Adaptation Guide](docs/ICON_GUIDE.md)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
