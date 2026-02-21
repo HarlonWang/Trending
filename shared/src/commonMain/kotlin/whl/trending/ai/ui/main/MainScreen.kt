@@ -26,6 +26,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -75,6 +77,7 @@ import org.jetbrains.compose.resources.stringResource
 import trending.shared.generated.resources.GitHub_Invertocat_Black
 import trending.shared.generated.resources.GitHub_Invertocat_White
 import trending.shared.generated.resources.Res
+import trending.shared.generated.resources.action_help
 import trending.shared.generated.resources.app_name
 import trending.shared.generated.resources.batch_am
 import trending.shared.generated.resources.batch_pm
@@ -90,6 +93,8 @@ import trending.shared.generated.resources.filter_period
 import trending.shared.generated.resources.filter_reset
 import trending.shared.generated.resources.history_batch
 import trending.shared.generated.resources.history_date
+import trending.shared.generated.resources.history_info_content
+import trending.shared.generated.resources.history_info_title
 import trending.shared.generated.resources.history_trending
 import trending.shared.generated.resources.icon_deepseek_dark
 import trending.shared.generated.resources.icon_deepseek_light
@@ -107,6 +112,8 @@ import trending.shared.generated.resources.stars_since
 import trending.shared.generated.resources.tab_daily
 import trending.shared.generated.resources.tab_monthly
 import trending.shared.generated.resources.tab_weekly
+import trending.shared.generated.resources.update_info_content
+import trending.shared.generated.resources.update_info_title
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -455,7 +462,16 @@ private fun FilterBottomSheet(
     var tempPeriod by remember { mutableStateOf(selectedPeriod) }
     var tempLanguage by remember { mutableStateOf(selectedLanguage) }
     var tempProviders by remember { mutableStateOf(selectedProviders) }
+    var showHelpDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    if (showHelpDialog) {
+        InfoDialog(
+            title = stringResource(Res.string.update_info_title),
+            content = stringResource(Res.string.update_info_content),
+            onDismiss = { showHelpDialog = false }
+        )
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -467,11 +483,12 @@ private fun FilterBottomSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.filter_options),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+            BottomSheetHeader(
+                title = stringResource(Res.string.filter_options),
+                onHelpClick = { showHelpDialog = true }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(Res.string.filter_period),
@@ -584,10 +601,19 @@ private fun HistoryBottomSheet(
 ) {
     var tempDate by remember { mutableStateOf(selectedDate ?: "") }
     var tempBatch by remember { mutableStateOf(selectedBatch ?: "am") }
+    var showHelpDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
     val datePickerState = rememberDatePickerState()
     var showDatePicker by remember { mutableStateOf(false) }
+
+    if (showHelpDialog) {
+        InfoDialog(
+            title = stringResource(Res.string.history_info_title),
+            content = stringResource(Res.string.history_info_content),
+            onDismiss = { showHelpDialog = false }
+        )
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -619,11 +645,12 @@ private fun HistoryBottomSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.history_trending),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+            BottomSheetHeader(
+                title = stringResource(Res.string.history_trending),
+                onHelpClick = { showHelpDialog = true }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(Res.string.history_date),
@@ -709,6 +736,48 @@ private fun HistoryBottomSheet(
                     Text(stringResource(Res.string.filter_done))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun InfoDialog(
+    title: String,
+    content: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = { Text(content) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.confirm))
+            }
+        }
+    )
+}
+
+@Composable
+private fun BottomSheetHeader(
+    title: String,
+    onHelpClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge
+        )
+        IconButton(onClick = onHelpClick) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = stringResource(Res.string.action_help),
+            )
         }
     }
 }
