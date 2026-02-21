@@ -78,5 +78,6 @@ android {
 }
 
 dependencies {
+    implementation(libs.aptabase)
     debugImplementation(libs.compose.uiTooling)
 }

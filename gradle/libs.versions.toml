@@ -16,6 +16,7 @@ kotlinx-serialization = "1.10.0"
 kotlinx-datetime = "0.7.1"
 kotlinx-coroutines = "1.10.2"
 composeIcons = "1.7.3"
+aptabase = "0.0.8"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -44,6 +45,7 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 compose-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "composeIcons" }
 compose-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "composeIcons" }
+aptabase = { module = "com.github.aptabase:aptabase-kotlin", version.ref = "aptabase" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
