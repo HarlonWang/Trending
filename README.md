@@ -14,6 +14,12 @@
 
 <img src="assets/android_screenshot.png" width="300">
 
+Currently in early preview:
+
+| Android | iOS |
+| --- | --- |
+| [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases) | *Coming Soon* |
+
 ---
 
 ## 📖 Introduction
@@ -26,15 +32,6 @@ Trending AI is a cross-platform application built with Kotlin Multiplatform (KMP
 - 🤖 **AI Summaries**: Integration with Gemini / DeepSeek models to automatically extract core features and logic for each repository.
 - 📅 **Historical Records**: Support for querying past lists by date and batch (Morning/Evening reports).
 - 📱 **Native Cross-platform**: Built with Compose Multiplatform, supporting both Android and iOS with a single codebase.
-
----
-
-## 📥 Download
-
-Currently in early preview:
-
-- **Android**: [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases)
-- **iOS**: *Coming Soon*
 
 ---
 

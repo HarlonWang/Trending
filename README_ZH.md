@@ -12,6 +12,12 @@
 
 <img src="assets/android_screenshot_zh.png" width="300">
 
+目前处于早期预览阶段：
+
+| Android | iOS |
+| --- | --- |
+| [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases) | *Coming Soon* |
+
 ---
 
 ## 📖 项目简介
@@ -24,15 +30,6 @@ Trending AI 是一款使用 Kotlin Multiplatform (KMP) 构建的跨平台应用�
 - 🤖 **AI 智能摘要**：集成 Gemini / DeepSeek 模型，为每个仓库自动提炼核心功能与逻辑。
 - 📅 **历史回溯**：支持按日期与批次（早报/晚报）查询往期榜单数据。
 - 📱 **原生跨平台**：采用 Compose Multiplatform 构建，一套代码同时覆盖 Android 与 iOS。
-
----
-
-## 📥 下载体验
-
-目前处于早期预览阶段：
-
-- **Android**: [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases)
-- **iOS**: *Coming Soon*
 
 ---
 
