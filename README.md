@@ -10,6 +10,12 @@
 
 ---
 
+## 📸 Preview
+
+<img src="assets/android_screenshot.png" width="300">
+
+---
+
 ## 📖 Introduction
 
 Trending AI is a cross-platform application built with Kotlin Multiplatform (KMP). It allows you to view GitHub's daily, weekly, and monthly trending repository lists and uses Large Language Models (LLMs) to automatically generate concise summaries for each project.
@@ -20,12 +26,6 @@ Trending AI is a cross-platform application built with Kotlin Multiplatform (KMP
 - 🤖 **AI Summaries**: Integration with Gemini / DeepSeek models to automatically extract core features and logic for each repository.
 - 📅 **Historical Records**: Support for querying past lists by date and batch (Morning/Evening reports).
 - 📱 **Native Cross-platform**: Built with Compose Multiplatform, supporting both Android and iOS with a single codebase.
-
----
-
-## 📸 Preview
-
-<img src="assets/android_screenshot.png" width="300">
 
 ---
 

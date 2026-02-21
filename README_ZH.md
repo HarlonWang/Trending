@@ -8,6 +8,12 @@
 
 ---
 
+## 📸 界面预览
+
+<img src="assets/android_screenshot.png" width="300">
+
+---
+
 ## 📖 项目简介
 
 Trending AI 是一款使用 Kotlin Multiplatform (KMP) 构建的跨平台应用。它不仅能让你随时查看 GitHub 的每日、每周、每月热门仓库榜单，还会通过接入的大语言模型，自动为每个项目生成一句话精炼摘要。
@@ -18,12 +24,6 @@ Trending AI 是一款使用 Kotlin Multiplatform (KMP) 构建的跨平台应用�
 - 🤖 **AI 智能摘要**：集成 Gemini / DeepSeek 模型，为每个仓库自动提炼核心功能与逻辑。
 - 📅 **历史回溯**：支持按日期与批次（早报/晚报）查询往期榜单数据。
 - 📱 **原生跨平台**：采用 Compose Multiplatform 构建，一套代码同时覆盖 Android 与 iOS。
-
----
-
-## 📸 界面预览
-
-<img src="assets/android_screenshot.png" width="300">
 
 ---
 
