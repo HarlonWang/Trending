@@ -2,15 +2,15 @@
 
 > 🚧 **当前状态：项目积极开发中 (Work in Progress)**
 
-**用 AI 快速读懂 GitHub Trending 开源项目。** 
+**用 AI 快速读懂 GitHub Trending 开源项目。**
+
+*帮你省去翻阅冗长 README 和源码的时间，高效过滤并定位高价值的开源代码。*
 
 ---
 
 ## 📖 项目简介
 
 Trending AI 是一款使用 Kotlin Multiplatform (KMP) 构建的跨平台应用。它不仅能让你随时查看 GitHub 的每日、每周、每月热门仓库榜单，还会通过接入的大语言模型，自动为每个项目生成一句话精炼摘要。
-
-帮你省去翻阅冗长 README 和源码的时间，高效过滤并定位高价值的开源代码。
 
 ## ✨ 核心功能
 
