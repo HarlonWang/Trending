@@ -10,7 +10,7 @@
 
 ## 📸 界面预览
 
-<img src="assets/android_screenshot.png" width="300">
+<img src="assets/android_screenshot_zh.png" width="300">
 
 ---
 
