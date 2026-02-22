@@ -18,7 +18,7 @@ Currently in early preview:
 
 | Android | iOS |
 | --- | --- |
-| [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://github.com/HarlonWang/Trending/releases) | *Coming Soon* |
+| [![Download](https://img.shields.io/badge/Download-APK-green?style=flat-square&logo=android)](https://download.trendingai.cn/TrendingAI-latest.apk) | *Coming Soon* |
 
 ---
 
