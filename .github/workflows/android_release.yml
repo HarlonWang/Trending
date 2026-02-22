@@ -218,15 +218,11 @@ jobs:
             $IS_PRERELEASE \
             "${FILES[@]}"
 
-      - name: Setup AWS CLI for R2
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
       - name: Upload APK to Cloudflare R2
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
           ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
         run: |
           # 动态寻找刚才打包好的 APK 路径 
