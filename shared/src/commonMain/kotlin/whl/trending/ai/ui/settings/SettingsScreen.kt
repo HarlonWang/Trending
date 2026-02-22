@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,6 +67,9 @@ import trending.shared.generated.resources.settings
 import trending.shared.generated.resources.theme_dark
 import trending.shared.generated.resources.theme_follow_system
 import trending.shared.generated.resources.theme_light
+
+import trending.shared.generated.resources.feedback
+import trending.shared.generated.resources.feedback_desc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -195,6 +199,16 @@ fun SettingsScreen(onBack: () -> Unit) {
 
             // 分组 3: 关于
             item { SettingsHeader(stringResource(Res.string.about)) }
+            item {
+                ListItem(
+                    headlineContent = { Text(stringResource(Res.string.feedback)) },
+                    supportingContent = { Text(stringResource(Res.string.feedback_desc)) },
+                    leadingContent = { Icon(Icons.Default.Feedback, null) },
+                    modifier = Modifier.clickable {
+                        openUrl(Constants.FEEDBACK_URL, Constants.GITHUB_APP_PACKAGE)
+                    }
+                )
+            }
             item {
                 ListItem(
                     headlineContent = { Text(stringResource(Res.string.check_updates)) },

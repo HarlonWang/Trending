@@ -48,4 +48,6 @@
     <string name="update_info_content">GitHub Trending 数据每日更新两次（间隔约 12 小时），确保您能及时发现最新的热门项目。</string>
     <string name="history_info_title">历史存档</string>
     <string name="history_info_content">系统记录了每日两个批次（上午/下午）的数据快照，您可以回溯并查看过往任何时段的趋势。</string>
+    <string name="feedback">反馈建议</string>
+    <string name="feedback_desc">提交反馈、问题或改进建议</string>
 </resources>
