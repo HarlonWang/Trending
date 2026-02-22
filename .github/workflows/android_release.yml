@@ -217,3 +217,35 @@ jobs:
             --generate-notes \
             $IS_PRERELEASE \
             "${FILES[@]}"
+
+      # ==========================================
+      # 新增：上传 APK 到 Cloudflare R2 对象存储 (方案一：固定链接)
+      # ==========================================
+      - name: Setup AWS CLI for R2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws-region: auto # Cloudflare R2 兼容 S3，region 填 auto 即可
+
+      - name: Upload APK to Cloudflare R2
+        env:
+          ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: |
+          # 动态寻找刚才打包好的 APK 路径 (基于上面 Create Release 相同的寻找逻辑)
+          APK_PATH=$(find androidApp/build/outputs/apk/release -name "*.apk" | head -n 1)
+          
+          if [ -z "$APK_PATH" ]; then
+            echo "Error: APK file not found!"
+            exit 1
+          fi
+          
+          echo "Found APK at: $APK_PATH"
+          echo "Uploading to R2..."
+          
+          # 执行上传操作，固定命名为 TrendingAI-latest.apk，覆盖上一版本
+          # 请确保 s3:// 后面跟着的是你在 R2 创建的真实 Bucket 名称
+          aws s3 cp "$APK_PATH" s3://trendingai-apk/TrendingAI-latest.apk \
+            --endpoint-url "https://$ACCOUNT_ID.r2.cloudflarestorage.com"
+          
+          echo "✅ Upload completed. Fixed download link: https://apk.trendingai.cn/TrendingAI-latest.apk"
