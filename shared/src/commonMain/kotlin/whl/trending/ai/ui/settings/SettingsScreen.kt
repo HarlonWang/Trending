@@ -225,7 +225,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                     supportingContent = { Text(stringResource(Res.string.about_us_desc)) },
                     leadingContent = { Icon(Icons.Default.Info, null) },
                     modifier = Modifier.clickable {
-                        openUrl(Constants.GITHUB_REPO_URL)
+                        openUrl(Constants.OFFICIAL_WEBSITE_URL)
                     }
                 )
             }
